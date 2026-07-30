@@ -1,0 +1,217 @@
+suite: elabftw deployment
+templates:
+  - templates/deployment.yaml
+
+release:
+  name: test
+
+set:
+  elabftw.siteUrl: "https://test.example.com"
+  elabftw.secrets.existingSecret: "test-secret"
+
+tests:
+  - it: renders a Deployment
+    asserts:
+      - isKind:
+          of: Deployment
+
+  - it: sets correct deployment name
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-elabftw
+
+  - it: sets replicas from values
+    set:
+      elabftw.replicaCount: 3
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+
+  - it: sets rolling update strategy
+    asserts:
+      - equal:
+          path: spec.strategy.type
+          value: RollingUpdate
+      - equal:
+          path: spec.strategy.rollingUpdate.maxUnavailable
+          value: 0
+      - equal:
+          path: spec.strategy.rollingUpdate.maxSurge
+          value: 1
+
+  - it: sets pod app label
+    asserts:
+      - exists:
+          path: spec.template.metadata.labels.app
+
+  - it: adds pod labels when configured
+    set:
+      elabftw.podLabels:
+        custom-label: test
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels.custom-label
+          value: test
+
+  - it: adds pod annotations when configured
+    set:
+      elabftw.podAnnotations:
+        prometheus.io/scrape: "true"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+
+  - it: sets container image
+    set:
+      elabftw.image.repository: myrepo/elabftw
+      elabftw.image.tag: "1.2.3"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: myrepo/elabftw:1.2.3
+
+  - it: sets image pull policy
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+
+  - it: sets container port
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 443
+
+  - it: sets resources when configured
+    set:
+      elabftw.resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: 100m
+
+  - it: configures site URL environment variable
+    set:
+      elabftw.siteUrl: "https://elab.example.com"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SITE_URL
+            value: "https://elab.example.com"
+
+  - it: configures nginx server name environment variable
+    set:
+      elabftw.serverName: elab.example.com
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SERVER_NAME
+            value: elab.example.com
+
+  - it: configures upload settings
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: MAX_UPLOAD_SIZE
+            value: 100M
+
+  - it: configures PHP timezone
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: PHP_TIMEZONE
+            value: Europe/Vienna
+
+  - it: disables redis by default
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: USE_REDIS
+            value: "false"
+
+  - it: enables redis when configured
+    set:
+      elabftw.redis.enabled: true
+      elabftw.redis.host: redis-test
+      elabftw.redis.port: 6380
+      elabftw.redis.passwordKey: redis-password
+      elabftw.redis.existingSecret: redis-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: USE_REDIS
+            value: "true"
+
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDIS_HOST
+            value: redis-test
+
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDIS_PORT
+            value: "6380"
+
+  - it: mounts persistent volume when enabled
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: data
+            mountPath: /elabftw/uploads
+
+  - it: disables persistent volume when persistence is disabled
+    set:
+      elabftw.persistence.enabled: false
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers[0].volumeMounts
+
+  - it: sets node selector
+    set:
+      elabftw.nodeSelector:
+        kubernetes.io/hostname: worker-1
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector["kubernetes.io/hostname"]
+          value: worker-1
+
+  - it: sets tolerations
+    set:
+      elabftw.tolerations:
+        - key: dedicated
+          operator: Equal
+          value: web
+          effect: NoSchedule
+    asserts:
+      - equal:
+          path: spec.template.spec.tolerations[0].key
+          value: dedicated
+
+  - it: sets affinity
+    set:
+      elabftw.affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+    asserts:
+      - equal:
+          path: spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution[0].topologyKey
+          value: kubernetes.io/hostname

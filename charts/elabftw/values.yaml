@@ -1,0 +1,211 @@
+---
+
+## @section Global parameters
+##
+
+## @param global.timezone Timezone used by application containers and services
+global:
+  timezone: Europe/Vienna
+
+## @section eLabFTW configuration
+##
+
+## @param elabftw.siteUrl Canonical URL of the eLabFTW instance, including scheme and optional non-standard port. Use the user-facing URL.
+## @param elabftw.serverName Server name used by the internal nginx configuration
+elabftw:
+  siteUrl: ""
+  serverName: elabftw.example.com
+
+  ## @param elabftw.disableHttps Disable HTTPS inside the container. Useful when TLS is terminated by an external reverse proxy.
+  ## @param elabftw.enableLetsencrypt Enable automatic Let's Encrypt certificate handling. Has no effect when HTTPS is disabled.
+  disableHttps: false
+  enableLetsencrypt: false
+
+  uploads:
+    ## @param elabftw.uploads.maxSize Maximum size allowed for uploaded files
+    maxSize: 100M
+    ## @param elabftw.uploads.maxTime Maximum upload time in milliseconds
+    maxTime: "900000"
+
+  php:
+    ## @param elabftw.php.memoryLimit Maximum amount of memory available to PHP scripts
+    memoryLimit: 256M
+    ## @param elabftw.php.maxChildren Maximum number of PHP-FPM child processes
+    maxChildren: "50"
+    ## @param elabftw.php.maxExecutionTime Maximum execution time of PHP scripts in seconds
+    maxExecutionTime: "300"
+
+  features:
+    ## @param elabftw.features.autoDbInit Automatically install the database structure on container start
+    autoDbInit: false
+    ## @param elabftw.features.autoDbUpdate Automatically update the database structure on container start
+    autoDbUpdate: false
+    ## @param elabftw.features.demoMode Enable demo mode with automatic login for demo users
+    demoMode: false
+    ## @param elabftw.features.maintenanceMode Enable maintenance mode and disable user interaction
+    maintenanceMode: false
+
+  database:
+    ## @param elabftw.database.persistentConnection Enable persistent MySQL database connections
+    persistentConnection: true
+
+  redis:
+    ## @param elabftw.redis.enabled Enable Redis support for PHP session storage
+    enabled: false
+    ## @param elabftw.redis.host Redis server hostname or IP address
+    host: redis
+    ## @param elabftw.redis.port Redis server port
+    port: 6379
+    ## @param elabftw.redis.username Redis username
+    username: ""
+    ## @param elabftw.redis.password Redis password
+    password: ""
+    ## @param elabftw.redis.existingSecret
+    existingSecret: ""
+    ## @param elabftw.redis.passwordKey Key containing the Redis password in the existing secret
+    passwordKey: password
+
+  ## @param elabftw.extraEnv Additional environment variables passed to the container
+  extraEnv: []
+
+  secrets:
+    ## @param elabftw.secrets.existingSecret
+    existingSecret: ""
+    ## @param elabftw.secrets.secretKey
+    secretKey: ""
+
+  ## @param elabftw.replicaCount Number of eLabFTW application replicas
+  replicaCount: 1
+
+  image:
+    ## @param elabftw.image.repository Container image repository
+    repository: elabftw/elabimg
+    ## @param elabftw.image.tag Container image tag
+    tag: ""
+    ## @param elabftw.image.pullPolicy Container image pull policy
+    pullPolicy: IfNotPresent
+
+  ## @param elabftw.nameOverride Override the generated resource name
+  nameOverride: ""
+  ## @param elabftw.fullnameOverride Override the full generated resource name
+  fullnameOverride: ""
+
+  container:
+    ## @param elabftw.container.port Container port exposed by the eLabFTW image
+    port: 443
+
+  service:
+    ## @param elabftw.service.type Kubernetes service type
+    type: ClusterIP
+    ## @param elabftw.service.port Kubernetes service port
+    port: 443
+    ## @param elabftw.service.targetPort Container port targeted by the service
+    targetPort: 443
+
+  ingress:
+    ## @param elabftw.ingress.enabled Enable Kubernetes ingress
+    enabled: false
+    ## @param elabftw.ingress.className Ingress controller class name
+    className: ""
+    ## @param elabftw.ingress.annotations Additional ingress annotations
+    annotations: {}
+    ## @param elabftw.ingress.host Hostname used by the ingress resource
+    host: elabftw.example.com
+    ## @param elabftw.ingress.path Path routed to eLabFTW
+    path: /
+    ## @param elabftw.ingress.pathType Kubernetes ingress path matching type
+    pathType: Prefix
+    ## @param elabftw.ingress.tls TLS configuration for ingress
+    tls: []
+
+  persistence:
+    ## @param elabftw.persistence.enabled Enable persistent storage for uploaded files
+    enabled: true
+    ## @param elabftw.persistence.existingClaim Use an existing persistent volume claim
+    existingClaim: ""
+    ## @param elabftw.persistence.accessMode
+    accessMode: ReadWriteMany
+    ## @param elabftw.persistence.storageClass Storage class for persistent volume
+    storageClass: ""
+    ## @param elabftw.persistence.size Persistent volume size
+    size: 20Gi
+    ## @param elabftw.persistence.mountPath Path where uploaded files are mounted
+    mountPath: /elabftw/uploads
+
+  ## @param elabftw.resources Kubernetes resource requests and limits
+  resources: {}
+
+  ## @param elabftw.podAnnotations Additional pod annotations
+  podAnnotations: {}
+  ## @param elabftw.podLabels Additional pod labels
+  podLabels: {}
+  ## @param elabftw.nodeSelector Node selector constraints
+  nodeSelector: {}
+  ## @param elabftw.tolerations Pod tolerations
+  tolerations: []
+  ## @param elabftw.affinity Pod affinity rules
+  affinity: {}
+
+## @section Internal MySQL
+##
+
+## @param mysql.enabled Deploy an internal MySQL database
+mysql:
+  enabled: false
+
+  image:
+    ## @param mysql.image.registry MySQL image registry
+    registry: docker.io
+    ## @param mysql.image.repository MySQL image repository
+    repository: bitnamilegacy/mysql
+    ## @param mysql.image.tag MySQL image tag
+    tag: 9.4.0-debian-12-r1
+    ## @param mysql.image.digest MySQL image digest
+    digest: ""
+
+  auth:
+    ## @param mysql.auth.database MySQL database name
+    database: "elabftw"
+    ## @param mysql.auth.username MySQL application username
+    username: "elabftw"
+    ## @param mysql.auth.password MySQL application password
+    password: ""
+    ## @param mysql.auth.rootPassword MySQL root password
+    rootPassword: ""
+
+    ## @param auth.existingSecret Use existing secret for password details. The secret has to contain the keys `mysql-root-password`, `mysql-replication-password` and `mysql-password`
+    ## NOTE: When it's set the auth.rootPassword, auth.password, auth.replicationPassword are ignored.
+    ##
+    existingSecret: ""
+
+  primary:
+    persistence:
+      ## @param mysql.primary.persistence.enabled Enable persistent storage for MySQL data
+      enabled: true
+      ## @param mysql.primary.persistence.size Persistent volume size for MySQL data
+      size: 5Gi
+
+## @section External MySQL
+##
+## Used when mysql.enabled=false
+##
+
+## @param externalDatabase.host Hostname or IP address of external MySQL server
+## @param externalDatabase.port MySQL server port
+## @param externalDatabase.database MySQL database name
+## @param externalDatabase.username MySQL username
+## @param externalDatabase.password MySQL password
+externalDatabase:
+  host: ""
+  port: 3306
+
+  database: elabftw
+  username: elabftw
+  password: ""
+
+  ## @param externalDatabase.existingSecret
+  existingSecret: ""
+  ## @param externalDatabase.usernameKey Key containing the database username in the existing secret
+  usernameKey: username
+  ## @param externalDatabase.passwordKey Key containing the database password in the existing secret
+  passwordKey: password

@@ -1,0 +1,244 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: {{ include "elabftw.fullname" . }}
+
+spec:
+  replicas: {{ .Values.elabftw.replicaCount }}
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+
+  selector:
+    matchLabels:
+      app: {{ include "elabftw.name" . }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ include "elabftw.name" . }}
+{{- with .Values.elabftw.podLabels }}
+{{ toYaml . | nindent 8 }}
+{{- end }}
+{{- with .Values.elabftw.podAnnotations }}
+      annotations:
+{{ toYaml . | nindent 8 }}
+{{- end }}
+
+    spec:
+      containers:
+        - name: {{ include "elabftw.name" . }}
+
+          image: "{{ .Values.elabftw.image.repository }}:{{ .Values.elabftw.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.elabftw.image.pullPolicy }}
+
+          ports:
+            - name: http
+              containerPort: {{ .Values.elabftw.container.port }}
+
+{{- with .Values.elabftw.resources }}
+          resources:
+{{ toYaml . | nindent 12 }}
+{{- end }}
+
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 20
+
+          env:
+
+            ################
+            # DATABASE
+            ################
+
+            - name: DB_HOST
+              value: {{ include "elabftw.database.host" . | quote }}
+
+            - name: DB_PORT
+              value: {{ include "elabftw.database.port" . | quote }}
+
+            - name: DB_NAME
+              value: {{ include "elabftw.database.name" . | quote }}
+
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "elabftw.database.secretName" . }}
+                  key: {{ include "elabftw.database.usernameKey" . }}
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "elabftw.database.secretName" . }}
+                  key: {{ include "elabftw.database.passwordKey" . }}
+
+            ################
+            # ELABFTW
+            ################
+
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-secret" (include "elabftw.fullname" .)) .Values.elabftw.secrets.existingSecret }}
+                  key: SECRET_KEY
+
+            - name: SITE_URL
+              value: {{ .Values.elabftw.siteUrl | quote }}
+
+            - name: SERVER_NAME
+              value: {{ .Values.elabftw.serverName | quote }}
+
+            - name: DISABLE_HTTPS
+              value: {{ .Values.elabftw.disableHttps | quote }}
+
+            - name: ENABLE_LETSENCRYPT
+              value: {{ .Values.elabftw.enableLetsencrypt | quote }}
+
+            - name: ENABLE_IPV6
+              value: "false"
+
+            - name: SET_REAL_IP
+              value: "false"
+
+            ################
+            # UPLOADS
+            ################
+
+            - name: MAX_UPLOAD_SIZE
+              value: {{ .Values.elabftw.uploads.maxSize | quote }}
+
+            - name: MAX_UPLOAD_TIME
+              value: {{ .Values.elabftw.uploads.maxTime | quote }}
+
+            ################
+            # FEATURES
+            ################
+
+            - name: AUTO_DB_INIT
+              value: {{ .Values.elabftw.features.autoDbInit | quote }}
+
+            - name: AUTO_DB_UPDATE
+              value: {{ .Values.elabftw.features.autoDbUpdate | quote }}
+
+            - name: DEMO_MODE
+              value: {{ .Values.elabftw.features.demoMode | quote }}
+
+            - name: MAINTENANCE_MODE
+              value: {{ .Values.elabftw.features.maintenanceMode | quote }}
+
+            ################
+            # PHP
+            ################
+
+            - name: PHP_TIMEZONE
+              value: {{ .Values.global.timezone | quote }}
+
+            - name: TZ
+              value: {{ .Values.global.timezone | quote }}
+
+            - name: MAX_PHP_MEMORY
+              value: {{ .Values.elabftw.php.memoryLimit | quote }}
+
+            - name: PHP_MAX_CHILDREN
+              value: {{ .Values.elabftw.php.maxChildren | quote }}
+
+            - name: PHP_MAX_EXECUTION_TIME
+              value: {{ .Values.elabftw.php.maxExecutionTime | quote }}
+
+            ################
+            # MYSQL OPTIONS
+            ################
+
+            - name: USE_PERSISTENT_MYSQL_CONN
+              value: {{ .Values.elabftw.database.persistentConnection | quote }}
+
+{{- if .Values.elabftw.redis.enabled }}
+
+            ################
+            # REDIS
+            ################
+
+            - name: USE_REDIS
+              value: "true"
+
+            - name: REDIS_HOST
+              value: {{ .Values.elabftw.redis.host | quote }}
+
+            - name: REDIS_PORT
+              value: {{ .Values.elabftw.redis.port | quote }}
+
+{{- if .Values.elabftw.redis.username }}
+
+            - name: REDIS_USERNAME
+              value: {{ .Values.elabftw.redis.username | quote }}
+
+{{- end }}
+
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-secret" (include "elabftw.fullname" .)) .Values.elabftw.redis.existingSecret }}
+                  key: {{ .Values.elabftw.redis.passwordKey }}
+
+{{- else }}
+
+            - name: USE_REDIS
+              value: "false"
+
+{{- end }}
+
+{{- with .Values.elabftw.extraEnv }}
+
+{{ toYaml . | nindent 12 }}
+
+{{- end }}
+
+{{- if .Values.elabftw.persistence.enabled }}
+
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.elabftw.persistence.mountPath }}
+
+{{- end }}
+
+{{- if .Values.elabftw.persistence.enabled }}
+
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ default (printf "%s-pvc" (include "elabftw.fullname" .)) .Values.elabftw.persistence.existingClaim }}
+
+{{- end }}
+
+{{- with .Values.elabftw.nodeSelector }}
+
+      nodeSelector:
+{{ toYaml . | nindent 8 }}
+
+{{- end }}
+
+{{- with .Values.elabftw.affinity }}
+
+      affinity:
+{{ toYaml . | nindent 8 }}
+
+{{- end }}
+
+{{- with .Values.elabftw.tolerations }}
+
+      tolerations:
+{{ toYaml . | nindent 8 }}
+
+{{- end }}

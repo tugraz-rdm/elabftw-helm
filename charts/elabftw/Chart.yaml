@@ -1,0 +1,25 @@
+apiVersion: v2
+name: elabftw
+description: A Helm chart for Kubernetes
+appVersion: "5.5.8"
+icon: https://www.elabftw.net/img/android-chrome-512x512.png
+keywords:
+  - elabftw
+  - electronic-lab-notebook
+  - eln
+  - lims
+  - laboratory
+  - research
+  - science
+  - kubernetes
+  - helm
+type: application
+version: 0.1.0
+dependencies:
+  - name: mysql
+    condition: mysql.enabled
+    repository: "oci://registry-1.docker.io/bitnamicharts"
+    version: "14.0.3"
+maintainers:
+  - name: tugraz-rdm
+    url: https://github.com/tugraz-rdm/elabftw-helm
