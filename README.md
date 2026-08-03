@@ -116,27 +116,48 @@ No `helm repo add` or `helm repo update` commands are required.
 
 ## Basic Installation
 
-Install the chart using the default configuration:
+Before installing the chart, create the required Kubernetes Secrets.
+
+
+Create the namespace:
+
+```bash
+kubectl create namespace elabftw
+```
+
+Create the eLabFTW application Secret:
+
+```bash
+kubectl create secret generic elabftw-secret \
+  --namespace elabftw \
+  --from-literal=secret-key='your-elabftw-secret-value'
+```
+
+Create the MySQL credentials Secret:
+
+```bash
+kubectl create secret generic elabftw-mysql-secret \
+  --namespace elabftw \
+  --from-literal=mysql-root-password='your-root-password' \
+  --from-literal=mysql-replication-password='your-replication-password' \
+  --from-literal=mysql-password='your-database-password'
+```
+
+Install the eLabFTW Helm chart using the existing Secrets:
 
 ```bash
 helm install elabftw \
   oci://ghcr.io/tugraz-rdm/elabftw \
   --namespace elabftw \
-  --create-namespace
+  --set elabftw.secrets.existingSecret=elabftw-secret \
+  --set elabftw.secrets.secretKey=secret-key \
+  --set mysql.auth.existingSecret=elabftw-mysql-secret
 ```
 
+## Custom Values Installation
 
-## Configuration
+Create a custom `values.yaml` file:
 
-The chart can be customized using either:
-
-1. A custom `values.yaml` file
-2. Inline Helm parameters using `--set`
-
-Values provided with `--set` take precedence over values defined in `values.yaml`.
-
-### Configure using values.yaml
-Create a custom values file:
 ```yaml
 elabftw:
   siteUrl: https://elabftw.example.com
@@ -157,6 +178,8 @@ mysql:
     username: ""
 
 ```
+The chart will create the required Kubernetes Secrets during installation using the values provided above.
+
 
 Install the chart with the custom configuration:
 ```bash
@@ -165,17 +188,4 @@ helm install elabftw \
   --namespace elabftw \
   --create-namespace \
   --values values.yaml
-```
-
-### Configure using inline values (--set)
-
-For quick changes or testing, values can be provided directly on the command line:
-
-```bash
-helm install elabftw \
-  oci://ghcr.io/tugraz-rdm/elabftw \
-  --namespace elabftw \
-  --create-namespace \
-  --set replicaCount=2 \
-  --set elabftw.image.tag=5.5.8
 ```

@@ -151,7 +151,7 @@ elabftw:
 
 ## @param mysql.enabled Deploy an internal MySQL database
 mysql:
-  enabled: false
+  enabled: true
 
   image:
     ## @param mysql.image.registry MySQL image registry
