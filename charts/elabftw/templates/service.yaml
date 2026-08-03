@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: {{ include "elabftw.fullname" . }}
+
+spec:
+  type: {{ .Values.elabftw.service.type }}
+
+  selector:
+    app: {{ include "elabftw.name" . }}
+
+  ports:
+    - port: {{ .Values.elabftw.service.port }}
+      targetPort: {{ .Values.elabftw.service.targetPort }}

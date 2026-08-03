@@ -1,0 +1,36 @@
+{{- if .Values.elabftw.ingress.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: {{ include "elabftw.fullname" . }}
+
+{{- with .Values.elabftw.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+
+spec:
+  {{- if .Values.elabftw.ingress.className }}
+  ingressClassName: {{ .Values.elabftw.ingress.className }}
+  {{- end }}
+
+{{- with .Values.elabftw.ingress.tls }}
+  tls:
+{{ toYaml . | indent 4 }}
+{{- end }}
+
+  rules:
+    - host: {{ .Values.elabftw.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.elabftw.ingress.path }}
+            pathType: {{ .Values.elabftw.ingress.pathType }}
+            backend:
+              service:
+                name: {{ include "elabftw.fullname" . }}
+                port:
+                  number: {{ .Values.elabftw.service.port }}
+
+{{- end }}

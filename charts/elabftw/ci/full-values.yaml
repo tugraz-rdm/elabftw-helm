@@ -1,0 +1,25 @@
+elabftw:
+  siteUrl: https://ci-full-test.example.com
+  serverName: ci-full-test.example.com
+
+  disableHttps: true
+  enableLetsencrypt: false
+
+  features:
+    autoDbInit: true
+    autoDbUpdate: true
+
+  secrets:
+    secretKey: "def000004247cac257cdb6c229fcc84e640a00f98362a758ecc0b48e14b2cc6d25af4284023220279205de34c173fae786376976fc321fe46a787bc9e7dc0d3843e1e131"
+
+  ingress:
+    enabled: true
+    className: nginx
+
+mysql:
+  enabled: true
+  auth:
+    rootPassword: rootPassword
+    password: elabftwpassword
+    database: elabftw
+    username: elabftw

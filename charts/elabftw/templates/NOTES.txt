@@ -1,0 +1,71 @@
+Thank you for installing {{ include "elabftw.fullname" . }}.
+
+{{- if .Values.elabftw.ingress.enabled }}
+
+Application URL:
+
+{{- if .Values.elabftw.ingress.tls }}
+https://{{ .Values.elabftw.ingress.host }}{{ .Values.elabftw.ingress.path }}
+{{- else }}
+http://{{ .Values.elabftw.ingress.host }}{{ .Values.elabftw.ingress.path }}
+{{- end }}
+
+{{- else if eq .Values.elabftw.service.type "NodePort" }}
+
+Get the application URL by running:
+
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} \
+    -o jsonpath="{.spec.ports[0].nodePort}" \
+    services {{ include "elabftw.fullname" . }})
+
+  export NODE_IP=$(kubectl get nodes \
+    --namespace {{ .Release.Namespace }} \
+    -o jsonpath="{.items[0].status.addresses[0].address}")
+
+  echo http://$NODE_IP:$NODE_PORT
+
+{{- else if eq .Values.elabftw.service.type "LoadBalancer" }}
+
+Get the application URL by running:
+
+  kubectl get svc --namespace {{ .Release.Namespace }} \
+    -w {{ include "elabftw.fullname" . }}
+
+{{- else if eq .Values.elabftw.service.type "ClusterIP" }}
+
+The service is exposed internally as:
+
+  {{ include "elabftw.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.elabftw.service.port }}
+
+To access it locally, run:
+
+  kubectl port-forward --namespace {{ .Release.Namespace }} \
+    svc/{{ include "elabftw.fullname" . }} \
+    8080:{{ .Values.elabftw.service.port }}
+
+Then open:
+
+  http://127.0.0.1:8080
+
+{{- end }}
+
+Configuration:
+
+  Image:
+    {{ .Values.elabftw.image.repository }}:{{ .Values.elabftw.image.tag | default .Chart.AppVersion }}
+
+  Persistence:
+    Enabled: {{ .Values.elabftw.persistence.enabled }}
+    Mount path: {{ .Values.elabftw.persistence.mountPath }}
+
+  Database:
+    Internal MySQL enabled: {{ .Values.mysql.enabled }}
+
+{{- if .Values.mysql.enabled }}
+    MySQL database:
+      {{ .Values.mysql.auth.database }}
+{{- else }}
+    External MySQL:
+      Host: {{ .Values.externalDatabase.host }}
+      Database: {{ .Values.externalDatabase.database }}
+{{- end }}

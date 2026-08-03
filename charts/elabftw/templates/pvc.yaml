@@ -1,0 +1,21 @@
+{{- if and .Values.elabftw.persistence.enabled (not .Values.elabftw.persistence.existingClaim) }}
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+
+metadata:
+  name: {{ include "elabftw.fullname" . }}-pvc
+
+spec:
+  accessModes:
+    - {{ .Values.elabftw.persistence.accessMode }}
+
+{{- if .Values.elabftw.persistence.storageClass }}
+  storageClassName: {{ .Values.elabftw.persistence.storageClass }}
+{{- end }}
+
+  resources:
+    requests:
+      storage: {{ .Values.elabftw.persistence.size }}
+
+{{- end }}
