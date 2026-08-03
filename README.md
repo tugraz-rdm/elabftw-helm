@@ -105,6 +105,77 @@
 | `externalDatabase.usernameKey`    | Key containing the database username in the existing secret | `username` |
 | `externalDatabase.passwordKey`    | Key containing the database password in the existing secret | `password` |
 
-## Installation
+---
 
-...
+# Installation
+
+This Helm chart is distributed as an **OCI-based Helm chart** using **GitHub Container Registry (GHCR)**.
+
+OCI-based Helm charts are installed directly from the registry using the `oci://` URL scheme.  
+No `helm repo add` or `helm repo update` commands are required.
+
+## Basic Installation
+
+Install the chart using the default configuration:
+
+```bash
+helm install elabftw \
+  oci://ghcr.io/tugraz-rdm/elabftw \
+  --namespace elabftw \
+  --create-namespace
+```
+
+
+## Configuration
+
+The chart can be customized using either:
+
+1. A custom `values.yaml` file
+2. Inline Helm parameters using `--set`
+
+Values provided with `--set` take precedence over values defined in `values.yaml`.
+
+### Configure using values.yaml
+Create a custom values file:
+```yaml
+elabftw:
+  siteUrl: https://elabftw.example.com
+  serverName: elabftw.example.com
+  features:
+    autoDbInit: true
+    autoDbUpdate: true
+
+  secrets:
+    secretKey: ""
+
+mysql:
+  enabled: true
+  auth:
+    rootPassword: ""
+    password: ""
+    database: ""
+    username: ""
+
+```
+
+Install the chart with the custom configuration:
+```bash
+helm install elabftw \
+  oci://ghcr.io/tugraz-rdm/elabftw \
+  --namespace elabftw \
+  --create-namespace \
+  --values values.yaml
+```
+
+### Configure using inline values (--set)
+
+For quick changes or testing, values can be provided directly on the command line:
+
+```bash
+helm install elabftw \
+  oci://ghcr.io/tugraz-rdm/elabftw \
+  --namespace elabftw \
+  --create-namespace \
+  --set replicaCount=2 \
+  --set elabftw.image.tag=5.5.8
+```
