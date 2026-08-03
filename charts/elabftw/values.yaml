@@ -128,7 +128,7 @@ elabftw:
     ## @param elabftw.persistence.storageClass Storage class for persistent volume
     storageClass: ""
     ## @param elabftw.persistence.size Persistent volume size
-    size: 20Gi
+    size: 10Gi
     ## @param elabftw.persistence.mountPath Path where uploaded files are mounted
     mountPath: /elabftw/uploads
 
@@ -145,6 +145,15 @@ elabftw:
   tolerations: []
   ## @param elabftw.affinity Pod affinity rules
   affinity: {}
+  ## @param elabftw.updateStrategy.type Deployment update strategy. Valid values: RollingUpdate, Recreate.
+  ## @param elabftw.updateStrategy.rollingUpdate.maxUnavailable Maximum number of Pods that can be unavailable during a RollingUpdate. Integer or percentage.
+  ## @param elabftw.updateStrategy.rollingUpdate.maxSurge Maximum number of extra Pods that can be created during a RollingUpdate. Integer or percentage.
+  updateStrategy:
+    type: RollingUpdate
+
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
 
 ## @section Internal MySQL
 ##
@@ -173,7 +182,7 @@ mysql:
     ## @param mysql.auth.rootPassword MySQL root password
     rootPassword: ""
 
-    ## @param auth.existingSecret Use existing secret for password details. The secret has to contain the keys `mysql-root-password`, `mysql-replication-password` and `mysql-password`
+    ## @param mysql.auth.existingSecret Use existing secret for password details. The secret has to contain the keys `mysql-root-password`, `mysql-replication-password` and `mysql-password`
     ## NOTE: When it's set the auth.rootPassword, auth.password, auth.replicationPassword are ignored.
     ##
     existingSecret: ""
