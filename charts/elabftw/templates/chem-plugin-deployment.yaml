@@ -6,29 +6,35 @@ metadata:
   labels:
     {{- include "elabftw.labels" . | nindent 4 }}
     app.kubernetes.io/component: chem-plugin
+
 spec:
   replicas: {{ .Values.addons.chemPlugin.replicaCount }}
+
   selector:
     matchLabels:
       {{- include "elabftw.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: chem-plugin
+
   template:
     metadata:
       labels:
         {{- include "elabftw.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: chem-plugin
         {{- with .Values.addons.chemPlugin.podLabels }}
-        {{- toYaml . | nindent 8 }}
+        {{ toYaml . | nindent 8 }}
         {{- end }}
+
       {{- with .Values.addons.chemPlugin.podAnnotations }}
       annotations:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+
+    spec:
+      {{- with .Values.addons.chemPlugin.podSecurityContext }}
+      securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    spec:
-    {{- with .Values.addons.chemPlugin.podSecurityContext }}
-      securityContext:
-    {{ toYaml . | nindent 8 }}
-    {{- end }}
+
       {{- with .Values.addons.chemPlugin.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -51,7 +57,7 @@ spec:
 
           ports:
             - name: http
-              containerPort: 80
+              containerPort: {{ .Values.addons.chemPlugin.service.targetPort }}
               protocol: TCP
 
           resources:
@@ -61,9 +67,11 @@ spec:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
             runAsUser: 65534
+
             capabilities:
               drop:
                 - ALL
+
             seccompProfile:
               type: RuntimeDefault
 {{- end }}

@@ -61,17 +61,45 @@ spec:
 
           env:
 
+{{- if .Values.addons.opencloning.enabled }}
+            ################
+            # OPENCLONING
+            ################
+
+            - name: OPENCLONING_URL
+              value: {{ .Values.addons.opencloning.url | quote }}
+
+            - name: USE_OPENCLONING
+              value: "true"
+
+
+{{- end }}
+
 {{- if .Values.addons.chemPlugin.enabled }}
 
             ################
             # CHEM PLUGIN
             ################
 
-            - name: FINGERPRINTER_URL
-              value: "http://{{ include "elabftw.fullname" . }}-chem-plugin/"
+{{- if .Values.addons.chemPlugin.indigo.enabled }}
+
+            - name: USE_INDIGO
+              value: "true"
 
             - name: INDIGO_URL
-              value: "http://{{ include "elabftw.fullname" . }}-chem-plugin/"
+              value: {{ .Values.addons.chemPlugin.indigo.url | quote }}
+
+{{- end }}
+
+{{- if .Values.addons.chemPlugin.fingerprinter.enabled }}
+
+            - name: USE_FINGERPRINTER
+              value: "true"
+
+            - name: FINGERPRINTER_URL
+              value: {{ .Values.addons.chemPlugin.fingerprinter.url | quote }}
+
+{{- end }}
 
 {{- end }}
 

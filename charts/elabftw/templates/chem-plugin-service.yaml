@@ -6,11 +6,14 @@ metadata:
   labels:
     {{- include "elabftw.labels" . | nindent 4 }}
     app.kubernetes.io/component: chem-plugin
+
 spec:
   type: {{ .Values.addons.chemPlugin.service.type }}
+
   selector:
     {{- include "elabftw.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: chem-plugin
+
   ports:
     - name: http
       protocol: TCP
