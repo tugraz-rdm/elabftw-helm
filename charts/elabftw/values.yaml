@@ -297,7 +297,7 @@ addons:
       ## @param addons.opencloning.image.repository Container image repository
       repository: manulera/opencloning
       ## @param addons.opencloning.image.tag Container image tag
-      tag: v1.1-baseurl-opencloning
+      tag: v1.3.1-baseurl-opencloning
       ## @param addons.opencloning.image.pullPolicy Container image pull policy
       pullPolicy: IfNotPresent
 
