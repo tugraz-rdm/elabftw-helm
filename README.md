@@ -236,3 +236,24 @@ helm install elabftw \
   --create-namespace \
   --values values.yaml
 ```
+
+---
+
+## Testing
+
+This chart uses the [helm-unittest](https://github.com/helm-unittest/helm-unittest) plugin to run unit tests for Helm templates.
+
+The tests verify that the templates in `templates/` render the expected Kubernetes resources based on different `values.yaml` configurations.
+### Install helm-unittest plugin
+
+```bash
+helm plugin install https://github.com/helm-unittest/helm-unittest
+```
+
+### Run chart tests
+
+Run all unit tests for the eLabFTW chart:
+
+```bash
+helm unittest charts/elabftw
+```

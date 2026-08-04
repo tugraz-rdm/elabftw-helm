@@ -1,0 +1,78 @@
+suite: Chem Plugin Deployment
+
+templates:
+  - chem-plugin-deployment.yaml
+
+tests:
+
+  - it: should not deploy chem plugin when disabled
+    set:
+      addons.chemPlugin.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should deploy chem plugin when enabled
+    set:
+      addons.chemPlugin.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-elabftw-chem-plugin
+
+      - equal:
+          path: spec.replicas
+          value: 1
+
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: chem-plugin
+
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: elabftw/chem-plugin:latest
+
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 8000
+
+  - it: should configure chem plugin security context
+    set:
+      addons.chemPlugin.enabled: true
+    asserts:
+
+      - equal:
+          path: spec.template.spec.securityContext.runAsNonRoot
+          value: true
+
+      - equal:
+          path: spec.template.spec.securityContext.runAsUser
+          value: 65534
+
+      - equal:
+          path: spec.template.spec.securityContext.seccompProfile.type
+          value: RuntimeDefault
+
+  - it: should apply resource configuration
+    set:
+      addons.chemPlugin.enabled: true
+      addons.chemPlugin.resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
+
+    asserts:
+
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: 100m
+
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 256Mi
