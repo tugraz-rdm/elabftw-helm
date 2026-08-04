@@ -252,13 +252,13 @@ addons:
       ## @param addons.chemPlugin.indigo.enabled Enable Indigo chemical structure editor integration
       enabled: true
       ## @param addons.chemPlugin.indigo.url Indigo service URL
-      url: http://elabftw-chem-plugin/
+      url: http://chem-plugin/
 
     fingerprinter:
       ## @param addons.chemPlugin.fingerprinter.enabled Enable chemical fingerprint generation
       enabled: true
       ## @param addons.chemPlugin.fingerprinter.url Fingerprinter service URL
-      url: http://elabftw-chem-plugin/
+      url: http://chem-plugin/
 
     service:
       ## @param addons.chemPlugin.service.type Kubernetes service type
@@ -323,7 +323,7 @@ addons:
     showAppBar: false
 
     ## @param addons.opencloning.url OpenCloning service URL used by eLabFTW
-    url: http://elabftw-opencloning/
+    url: http://opencloning/
 
     service:
       ## @param addons.opencloning.service.type Kubernetes service type

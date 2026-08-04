@@ -22,7 +22,7 @@ tests:
 
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-elabftw-opencloning
+          value: opencloning
 
       - equal:
           path: spec.type

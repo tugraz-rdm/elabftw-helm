@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "elabftw.fullname" . }}-chem-plugin
+  name: chem-plugin
   labels:
     {{- include "elabftw.labels" . | nindent 4 }}
     app.kubernetes.io/component: chem-plugin

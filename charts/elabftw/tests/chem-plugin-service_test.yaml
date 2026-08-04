@@ -21,7 +21,7 @@ tests:
 
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-elabftw-chem-plugin
+          value: chem-plugin
 
       - equal:
           path: spec.type

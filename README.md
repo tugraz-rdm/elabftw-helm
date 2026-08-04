@@ -107,51 +107,51 @@
 
 ### Addons
 
-| Name                                                        | Description                                         | Value                         |
-| ----------------------------------------------------------- | --------------------------------------------------- | ----------------------------- |
-| `addons.chemPlugin.enabled`                                 | Deploy the eLabFTW chemistry plugin                 | `false`                       |
-| `addons.chemPlugin.replicaCount`                            | Number of chemistry plugin replicas                 | `1`                           |
-| `addons.chemPlugin.image.repository`                        | Container image repository                          | `elabftw/chem-plugin`         |
-| `addons.chemPlugin.image.tag`                               | Container image tag                                 | `latest`                      |
-| `addons.chemPlugin.image.pullPolicy`                        | Container image pull policy                         | `IfNotPresent`                |
-| `addons.chemPlugin.podSecurityContext.runAsNonRoot`         | Run containers as a non-root user                   | `true`                        |
-| `addons.chemPlugin.podSecurityContext.runAsUser`            | User ID used to run the container                   | `65534`                       |
-| `addons.chemPlugin.podSecurityContext.seccompProfile.type`  | Seccomp profile type                                | `RuntimeDefault`              |
-| `addons.chemPlugin.indigo.enabled`                          | Enable Indigo chemical structure editor integration | `true`                        |
-| `addons.chemPlugin.indigo.url`                              | Indigo service URL                                  | `http://elabftw-chem-plugin/` |
-| `addons.chemPlugin.fingerprinter.enabled`                   | Enable chemical fingerprint generation              | `true`                        |
-| `addons.chemPlugin.fingerprinter.url`                       | Fingerprinter service URL                           | `http://elabftw-chem-plugin/` |
-| `addons.chemPlugin.service.type`                            | Kubernetes service type                             | `ClusterIP`                   |
-| `addons.chemPlugin.service.port`                            | Kubernetes service port                             | `80`                          |
-| `addons.chemPlugin.service.targetPort`                      | Container port targeted by the service              | `8000`                        |
-| `addons.chemPlugin.resources`                               | Kubernetes resource requests and limits             | `{}`                          |
-| `addons.chemPlugin.podAnnotations`                          | Additional pod annotations                          | `{}`                          |
-| `addons.chemPlugin.podLabels`                               | Additional pod labels                               | `{}`                          |
-| `addons.chemPlugin.nodeSelector`                            | Node selector constraints                           | `{}`                          |
-| `addons.chemPlugin.tolerations`                             | Pod tolerations                                     | `[]`                          |
-| `addons.chemPlugin.affinity`                                | Pod affinity rules                                  | `{}`                          |
-| `addons.opencloning.enabled`                                | Deploy the OpenCloning plugin                       | `false`                       |
-| `addons.opencloning.replicaCount`                           | Number of OpenCloning plugin replicas               | `1`                           |
-| `addons.opencloning.image.repository`                       | Container image repository                          | `manulera/opencloning`        |
-| `addons.opencloning.image.tag`                              | Container image tag                                 | `v1.1-baseurl-opencloning`    |
-| `addons.opencloning.image.pullPolicy`                       | Container image pull policy                         | `IfNotPresent`                |
-| `addons.opencloning.podSecurityContext.runAsNonRoot`        | Run containers as a non-root user                   | `true`                        |
-| `addons.opencloning.podSecurityContext.runAsUser`           | User ID used to run the container                   | `1000`                        |
-| `addons.opencloning.podSecurityContext.seccompProfile.type` | Seccomp profile type                                | `RuntimeDefault`              |
-| `addons.opencloning.allowedOrigins`                         | Allowed CORS origins                                | `*`                           |
-| `addons.opencloning.rootPath`                               | Base path where OpenCloning is served               | `/opencloning`                |
-| `addons.opencloning.backendUrl`                             | Backend URL exposed to the frontend                 | `/opencloning/`               |
-| `addons.opencloning.showAppBar`                             | Show the application navigation bar                 | `false`                       |
-| `addons.opencloning.url`                                    | OpenCloning service URL used by eLabFTW             | `http://elabftw-opencloning/` |
-| `addons.opencloning.service.type`                           | Kubernetes service type                             | `ClusterIP`                   |
-| `addons.opencloning.service.port`                           | Kubernetes service port                             | `80`                          |
-| `addons.opencloning.service.targetPort`                     | Container port targeted by the service              | `8000`                        |
-| `addons.opencloning.resources`                              | Kubernetes resource requests and limits             | `{}`                          |
-| `addons.opencloning.podAnnotations`                         | Additional pod annotations                          | `{}`                          |
-| `addons.opencloning.podLabels`                              | Additional pod labels                               | `{}`                          |
-| `addons.opencloning.nodeSelector`                           | Node selector constraints                           | `{}`                          |
-| `addons.opencloning.tolerations`                            | Pod tolerations                                     | `[]`                          |
-| `addons.opencloning.affinity`                               | Pod affinity rules                                  | `{}`                          |
+| Name                                                        | Description                                         | Value                        |
+| ----------------------------------------------------------- | --------------------------------------------------- | ---------------------------- |
+| `addons.chemPlugin.enabled`                                 | Deploy the eLabFTW chemistry plugin                 | `false`                      |
+| `addons.chemPlugin.replicaCount`                            | Number of chemistry plugin replicas                 | `1`                          |
+| `addons.chemPlugin.image.repository`                        | Container image repository                          | `elabftw/chem-plugin`        |
+| `addons.chemPlugin.image.tag`                               | Container image tag                                 | `latest`                     |
+| `addons.chemPlugin.image.pullPolicy`                        | Container image pull policy                         | `IfNotPresent`               |
+| `addons.chemPlugin.podSecurityContext.runAsNonRoot`         | Run containers as a non-root user                   | `true`                       |
+| `addons.chemPlugin.podSecurityContext.runAsUser`            | User ID used to run the container                   | `65534`                      |
+| `addons.chemPlugin.podSecurityContext.seccompProfile.type`  | Seccomp profile type                                | `RuntimeDefault`             |
+| `addons.chemPlugin.indigo.enabled`                          | Enable Indigo chemical structure editor integration | `true`                       |
+| `addons.chemPlugin.indigo.url`                              | Indigo service URL                                  | `http://chem-plugin/`        |
+| `addons.chemPlugin.fingerprinter.enabled`                   | Enable chemical fingerprint generation              | `true`                       |
+| `addons.chemPlugin.fingerprinter.url`                       | Fingerprinter service URL                           | `http://chem-plugin/`        |
+| `addons.chemPlugin.service.type`                            | Kubernetes service type                             | `ClusterIP`                  |
+| `addons.chemPlugin.service.port`                            | Kubernetes service port                             | `80`                         |
+| `addons.chemPlugin.service.targetPort`                      | Container port targeted by the service              | `8000`                       |
+| `addons.chemPlugin.resources`                               | Kubernetes resource requests and limits             | `{}`                         |
+| `addons.chemPlugin.podAnnotations`                          | Additional pod annotations                          | `{}`                         |
+| `addons.chemPlugin.podLabels`                               | Additional pod labels                               | `{}`                         |
+| `addons.chemPlugin.nodeSelector`                            | Node selector constraints                           | `{}`                         |
+| `addons.chemPlugin.tolerations`                             | Pod tolerations                                     | `[]`                         |
+| `addons.chemPlugin.affinity`                                | Pod affinity rules                                  | `{}`                         |
+| `addons.opencloning.enabled`                                | Deploy the OpenCloning plugin                       | `false`                      |
+| `addons.opencloning.replicaCount`                           | Number of OpenCloning plugin replicas               | `1`                          |
+| `addons.opencloning.image.repository`                       | Container image repository                          | `manulera/opencloning`       |
+| `addons.opencloning.image.tag`                              | Container image tag                                 | `v1.3.1-baseurl-opencloning` |
+| `addons.opencloning.image.pullPolicy`                       | Container image pull policy                         | `IfNotPresent`               |
+| `addons.opencloning.podSecurityContext.runAsNonRoot`        | Run containers as a non-root user                   | `true`                       |
+| `addons.opencloning.podSecurityContext.runAsUser`           | User ID used to run the container                   | `1000`                       |
+| `addons.opencloning.podSecurityContext.seccompProfile.type` | Seccomp profile type                                | `RuntimeDefault`             |
+| `addons.opencloning.allowedOrigins`                         | Allowed CORS origins                                | `*`                          |
+| `addons.opencloning.rootPath`                               | Base path where OpenCloning is served               | `/opencloning`               |
+| `addons.opencloning.backendUrl`                             | Backend URL exposed to the frontend                 | `/opencloning/`              |
+| `addons.opencloning.showAppBar`                             | Show the application navigation bar                 | `false`                      |
+| `addons.opencloning.url`                                    | OpenCloning service URL used by eLabFTW             | `http://opencloning/`        |
+| `addons.opencloning.service.type`                           | Kubernetes service type                             | `ClusterIP`                  |
+| `addons.opencloning.service.port`                           | Kubernetes service port                             | `80`                         |
+| `addons.opencloning.service.targetPort`                     | Container port targeted by the service              | `8000`                       |
+| `addons.opencloning.resources`                              | Kubernetes resource requests and limits             | `{}`                         |
+| `addons.opencloning.podAnnotations`                         | Additional pod annotations                          | `{}`                         |
+| `addons.opencloning.podLabels`                              | Additional pod labels                               | `{}`                         |
+| `addons.opencloning.nodeSelector`                           | Node selector constraints                           | `{}`                         |
+| `addons.opencloning.tolerations`                            | Pod tolerations                                     | `[]`                         |
+| `addons.opencloning.affinity`                               | Pod affinity rules                                  | `{}`                         |
 
 This Helm chart is distributed as an **OCI-based Helm chart** using **GitHub Container Registry (GHCR)**.
 

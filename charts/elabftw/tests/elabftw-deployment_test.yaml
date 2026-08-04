@@ -230,7 +230,7 @@ tests:
     set:
       addons.chemPlugin.enabled: true
       addons.chemPlugin.indigo.enabled: true
-      addons.chemPlugin.indigo.url: "http://elabftw-chem-plugin:8080/"
+      addons.chemPlugin.indigo.url: "http://chem-plugin:8080/"
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
@@ -242,13 +242,13 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: INDIGO_URL
-            value: "http://elabftw-chem-plugin:8080/"
+            value: "http://chem-plugin:8080/"
 
   - it: configures fingerprinter when chem plugin is enabled
     set:
       addons.chemPlugin.enabled: true
       addons.chemPlugin.fingerprinter.enabled: true
-      addons.chemPlugin.fingerprinter.url: "http://elabftw-chem-plugin:8000/"
+      addons.chemPlugin.fingerprinter.url: "http://chem-plugin:8000/"
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
@@ -260,7 +260,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: FINGERPRINTER_URL
-            value: "http://elabftw-chem-plugin:8000/"
+            value: "http://chem-plugin:8000/"
 
 
   - it: does not configure opencloning when disabled
@@ -276,10 +276,10 @@ tests:
   - it: configures opencloning when enabled
     set:
       addons.opencloning.enabled: true
-      addons.opencloning.url: "http://elabftw-opencloning/"
+      addons.opencloning.url: "http://opencloning/"
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
             name: OPENCLONING_URL
-            value: "http://elabftw-opencloning/"
+            value: "http://opencloning/"
