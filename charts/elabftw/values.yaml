@@ -218,3 +218,57 @@ externalDatabase:
   usernameKey: username
   ## @param externalDatabase.passwordKey Key containing the database password in the existing secret
   passwordKey: password
+
+
+## @section Addons
+##
+
+addons:
+  ## @param addons.chemPlugin.enabled Deploy the eLabFTW chemistry plugin
+  chemPlugin:
+    enabled: false
+
+    ## @param addons.chemPlugin.replicaCount Number of chemistry plugin replicas
+    replicaCount: 1
+
+    image:
+      ## @param addons.chemPlugin.image.repository Container image repository
+      repository: elabftw/chem-plugin
+      ## @param addons.chemPlugin.image.tag Container image tag
+      tag: latest
+      ## @param addons.chemPlugin.image.pullPolicy Container image pull policy
+      pullPolicy: IfNotPresent
+
+    podSecurityContext:
+      ## @param addons.chemPlugin.podSecurityContext.runAsNonRoot Run containers as a non-root user
+      runAsNonRoot: true
+      ## @param addons.chemPlugin.podSecurityContext.runAsUser User ID used to run the container
+      runAsUser: 65534
+      seccompProfile:
+        ## @param addons.chemPlugin.podSecurityContext.seccompProfile.type Seccomp profile type
+        type: RuntimeDefault
+
+    service:
+      ## @param addons.chemPlugin.service.type Kubernetes service type
+      type: ClusterIP
+      ## @param addons.chemPlugin.service.port Kubernetes service port
+      port: 80
+      ## @param addons.chemPlugin.service.targetPort Container port targeted by the service
+      targetPort: 80
+
+    ## @param addons.chemPlugin.resources Kubernetes resource requests and limits
+    resources: {}
+    ## @param addons.chemPlugin.podAnnotations Additional pod annotations
+    podAnnotations: {}
+
+    ## @param addons.chemPlugin.podLabels Additional pod labels
+    podLabels: {}
+
+    ## @param addons.chemPlugin.nodeSelector Node selector constraints
+    nodeSelector: {}
+
+    ## @param addons.chemPlugin.tolerations Pod tolerations
+    tolerations: []
+
+    ## @param addons.chemPlugin.affinity Pod affinity rules
+    affinity: {}

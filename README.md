@@ -105,14 +105,27 @@
 | `externalDatabase.usernameKey`    | Key containing the database username in the existing secret | `username` |
 | `externalDatabase.passwordKey`    | Key containing the database password in the existing secret | `password` |
 
-This Helm chart is distributed as an **OCI-based Helm chart** using **GitHub Container Registry (GHCR)**.
+### Addons
 
-OCI-based Helm charts are installed directly from the registry using the `oci://` URL scheme.  
-No `helm repo add` or `helm repo update` commands are required.
-
----
-
-# Installation
+| Name                                                       | Description                             | Value                 |
+| ---------------------------------------------------------- | --------------------------------------- | --------------------- |
+| `addons.chemPlugin.enabled`                                | Deploy the eLabFTW chemistry plugin     | `false`               |
+| `addons.chemPlugin.replicaCount`                           | Number of chemistry plugin replicas     | `1`                   |
+| `addons.chemPlugin.image.repository`                       | Container image repository              | `elabftw/chem-plugin` |
+| `addons.chemPlugin.image.tag`                              | Container image tag                     | `latest`              |
+| `addons.chemPlugin.image.pullPolicy`                       | Container image pull policy             | `IfNotPresent`        |
+| `addons.chemPlugin.podSecurityContext.runAsNonRoot`        | Run containers as a non-root user       | `true`                |
+| `addons.chemPlugin.podSecurityContext.runAsUser`           | User ID used to run the container       | `65534`               |
+| `addons.chemPlugin.podSecurityContext.seccompProfile.type` | Seccomp profile type                    | `RuntimeDefault`      |
+| `addons.chemPlugin.service.type`                           | Kubernetes service type                 | `ClusterIP`           |
+| `addons.chemPlugin.service.port`                           | Kubernetes service port                 | `80`                  |
+| `addons.chemPlugin.service.targetPort`                     | Container port targeted by the service  | `80`                  |
+| `addons.chemPlugin.resources`                              | Kubernetes resource requests and limits | `{}`                  |
+| `addons.chemPlugin.podAnnotations`                         | Additional pod annotations              | `{}`                  |
+| `addons.chemPlugin.podLabels`                              | Additional pod labels                   | `{}`                  |
+| `addons.chemPlugin.nodeSelector`                           | Node selector constraints               | `{}`                  |
+| `addons.chemPlugin.tolerations`                            | Pod tolerations                         | `[]`                  |
+| `addons.chemPlugin.affinity`                               | Pod affinity rules                      | `{}`                  |
 
 This Helm chart is distributed as an **OCI-based Helm chart** using **GitHub Container Registry (GHCR)**.
 

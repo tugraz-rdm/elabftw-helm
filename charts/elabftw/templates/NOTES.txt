@@ -69,3 +69,12 @@ Configuration:
       Host: {{ .Values.externalDatabase.host }}
       Database: {{ .Values.externalDatabase.database }}
 {{- end }}
+
+  Addons:
+
+    Chem plugin enabled: {{ .Values.addons.chemPlugin.enabled }}
+
+{{- if .Values.addons.chemPlugin.enabled }}
+    Chem plugin service:
+      {{ include "elabftw.fullname" . }}-chem-plugin.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.addons.chemPlugin.service.port }}
+{{- end }}
