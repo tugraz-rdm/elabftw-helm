@@ -1,0 +1,22 @@
+{{- if .Values.addons.chemPlugin.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: chem-plugin
+  labels:
+    {{- include "elabftw.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chem-plugin
+
+spec:
+  type: {{ .Values.addons.chemPlugin.service.type }}
+
+  selector:
+    {{- include "elabftw.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: chem-plugin
+
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{ .Values.addons.chemPlugin.service.port }}
+      targetPort: {{ .Values.addons.chemPlugin.service.targetPort }}
+{{- end }}

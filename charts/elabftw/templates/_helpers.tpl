@@ -5,6 +5,11 @@ Expand the chart name.
 {{- default .Chart.Name .Values.elabftw.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "elabftw.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "elabftw.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
 {{/*
 Create the fullname.
 */}}

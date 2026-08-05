@@ -1,0 +1,22 @@
+{{- if .Values.addons.opencloning.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: opencloning
+  labels:
+    {{- include "elabftw.labels" . | nindent 4 }}
+    app.kubernetes.io/component: opencloning
+
+spec:
+  type: {{ .Values.addons.opencloning.service.type }}
+
+  selector:
+    {{- include "elabftw.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: opencloning
+
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{ .Values.addons.opencloning.service.port }}
+      targetPort: {{ .Values.addons.opencloning.service.targetPort }}
+{{- end }}

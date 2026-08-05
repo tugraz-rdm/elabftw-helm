@@ -1,0 +1,97 @@
+{{- if .Values.addons.opencloning.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opencloning
+  labels:
+    {{- include "elabftw.labels" . | nindent 4 }}
+    app.kubernetes.io/component: opencloning
+
+spec:
+  replicas: {{ .Values.addons.opencloning.replicaCount }}
+
+  selector:
+    matchLabels:
+      {{- include "elabftw.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: opencloning
+
+  template:
+    metadata:
+      labels:
+        {{- include "elabftw.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: opencloning
+{{- with .Values.addons.opencloning.podLabels }}
+{{ toYaml . | nindent 8 }}
+{{- end }}
+
+{{- with .Values.addons.opencloning.podAnnotations }}
+      annotations:
+{{ toYaml . | nindent 8 }}
+{{- end }}
+
+    spec:
+{{- with .Values.addons.opencloning.podSecurityContext }}
+      securityContext:
+{{ toYaml . | nindent 8 }}
+{{- end }}
+
+      containers:
+        - name: opencloning
+
+          image: "{{ .Values.addons.opencloning.image.repository }}:{{ .Values.addons.opencloning.image.tag }}"
+          imagePullPolicy: {{ .Values.addons.opencloning.image.pullPolicy }}
+
+          ports:
+            - name: http
+              containerPort: {{ .Values.addons.opencloning.service.targetPort }}
+              protocol: TCP
+
+          resources:
+{{ toYaml .Values.addons.opencloning.resources | nindent 12 }}
+
+          env:
+            - name: ALLOWED_ORIGINS
+              value: {{ .Values.addons.opencloning.allowedOrigins | quote }}
+
+            - name: ROOT_PATH
+              value: {{ .Values.addons.opencloning.rootPath | quote }}
+
+            - name: BACKEND_URL
+              value: {{ .Values.addons.opencloning.backendUrl | quote }}
+
+            - name: SHOW_APP_BAR
+              value: {{ .Values.addons.opencloning.showAppBar | quote }}
+
+            - name: DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "elabftw.database.secretName" . }}
+                  key: {{ include "elabftw.database.passwordKey" . }}
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+
+            capabilities:
+              drop:
+                - ALL
+
+            seccompProfile:
+              type: RuntimeDefault
+
+{{- with .Values.addons.opencloning.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | nindent 8 }}
+{{- end }}
+
+{{- with .Values.addons.opencloning.affinity }}
+      affinity:
+{{ toYaml . | nindent 8 }}
+{{- end }}
+
+{{- with .Values.addons.opencloning.tolerations }}
+      tolerations:
+{{ toYaml . | nindent 8 }}
+{{- end }}
+{{- end }}

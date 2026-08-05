@@ -1,0 +1,82 @@
+suite: OpenCloning Deployment
+
+templates:
+  - opencloning-deployment.yaml
+
+tests:
+
+  - it: should not deploy opencloning when disabled
+    set:
+      addons.opencloning.enabled: false
+
+    asserts:
+      - hasDocuments:
+          count: 0
+
+
+  - it: should deploy opencloning when enabled
+    set:
+      addons.opencloning.enabled: true
+
+    asserts:
+
+      - hasDocuments:
+          count: 1
+
+      - equal:
+          path: metadata.name
+          value: opencloning
+
+      - equal:
+          path: spec.replicas
+          value: 1
+
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: opencloning
+
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: manulera/opencloning:v1.3.1-baseurl-opencloning
+
+
+  - it: should expose opencloning port 8000
+    set:
+      addons.opencloning.enabled: true
+
+    asserts:
+
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 8000
+
+
+  - it: should configure opencloning environment variables
+    set:
+      addons.opencloning.enabled: true
+
+    asserts:
+
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ALLOWED_ORIGINS
+            value: "*"
+
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ROOT_PATH
+            value: "/opencloning"
+
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: BACKEND_URL
+            value: "/opencloning/"
+
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SHOW_APP_BAR
+            value: "false"

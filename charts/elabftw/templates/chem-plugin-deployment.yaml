@@ -1,0 +1,77 @@
+{{- if .Values.addons.chemPlugin.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chem-plugin
+  labels:
+    {{- include "elabftw.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chem-plugin
+
+spec:
+  replicas: {{ .Values.addons.chemPlugin.replicaCount }}
+
+  selector:
+    matchLabels:
+      {{- include "elabftw.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: chem-plugin
+
+  template:
+    metadata:
+      labels:
+        {{- include "elabftw.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: chem-plugin
+        {{- with .Values.addons.chemPlugin.podLabels }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
+
+      {{- with .Values.addons.chemPlugin.podAnnotations }}
+      annotations:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+
+    spec:
+      {{- with .Values.addons.chemPlugin.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.addons.chemPlugin.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.addons.chemPlugin.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.addons.chemPlugin.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      containers:
+        - name: chem-plugin
+          image: "{{ .Values.addons.chemPlugin.image.repository }}:{{ .Values.addons.chemPlugin.image.tag }}"
+          imagePullPolicy: {{ .Values.addons.chemPlugin.image.pullPolicy }}
+
+          ports:
+            - name: http
+              containerPort: {{ .Values.addons.chemPlugin.service.targetPort }}
+              protocol: TCP
+
+          resources:
+            {{- toYaml .Values.addons.chemPlugin.resources | nindent 12 }}
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65534
+
+            capabilities:
+              drop:
+                - ALL
+
+            seccompProfile:
+              type: RuntimeDefault
+{{- end }}
