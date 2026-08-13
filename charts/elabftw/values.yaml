@@ -209,6 +209,7 @@ externalDatabase:
 
 addons:
   ## @param addons.chemPlugin.enabled Deploy the eLabFTW chemistry plugin
+  ## @notice The chemPlugin is available in v5.5.x but was removed in v5.6.x.
   chemPlugin:
     enabled: false
 
