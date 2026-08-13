@@ -2,7 +2,7 @@
 
 ## Introduction
 
-> **Alpha status:** This chart is currently in the ALPHA stage of development. It is functional but may contain incomplete features, breaking changes, or configuration changes in future releases. It is not yet recommended for production workloads without thorough testing.
+> **Beta status:** This chart is currently in the BETA stage of development. It is functional and suitable for testing and evaluation, but may still contain breaking changes or configuration changes in future releases. Thorough testing is recommended before using it in production workloads.
 
 ---
 
