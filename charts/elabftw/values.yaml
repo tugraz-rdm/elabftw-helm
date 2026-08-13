@@ -49,22 +49,6 @@ elabftw:
     ## @param elabftw.database.persistentConnection Enable persistent MySQL database connections
     persistentConnection: true
 
-  redis:
-    ## @param elabftw.redis.enabled Enable Redis support for PHP session storage
-    enabled: false
-    ## @param elabftw.redis.host Redis server hostname or IP address
-    host: redis
-    ## @param elabftw.redis.port Redis server port
-    port: 6379
-    ## @param elabftw.redis.username Redis username
-    username: ""
-    ## @param elabftw.redis.password Redis password
-    password: ""
-    ## @param elabftw.redis.existingSecret
-    existingSecret: ""
-    ## @param elabftw.redis.passwordKey Key containing the Redis password in the existing secret
-    passwordKey: password
-
   ## @param elabftw.extraEnv Additional environment variables passed to the container
   extraEnv: []
 
@@ -350,3 +334,71 @@ addons:
 
     ## @param addons.opencloning.affinity Pod affinity rules
     affinity: {}
+
+## @section Internal Redis
+##
+
+## @param redis.enabled Deploy an internal Redis instance and enable Redis support
+redis:
+  enabled: false
+
+  image:
+    ## @param redis.image.registry Redis image registry
+    registry: docker.io
+    ## @param redis.image.repository Redis image repository
+    repository: bitnamilegacy/redis
+    ## @param redis.image.tag Redis image tag
+    tag: 8.2.1-debian-12-r0
+    ## @param redis.image.digest Redis image digest
+    digest: ""
+
+  auth:
+    ## @param redis.auth.enabled Enable Redis authentication
+    enabled: true
+
+    ## @param redis.auth.password Redis password
+    password: ""
+
+    ## @param redis.auth.existingSecret Existing secret containing the Redis password
+    existingSecret: ""
+
+    ## @param redis.auth.existingSecretPasswordKey Key containing the Redis password in the existing secret
+    existingSecretPasswordKey: redis-password
+
+  master:
+    persistence:
+      ## @param redis.master.persistence.enabled Enable persistent storage for Redis
+      enabled: true
+      ## @param redis.master.persistence.size Persistent volume size for Redis
+      size: 1Gi
+
+
+## @section External Redis
+##
+## Used when redis.enabled=false
+##
+
+## @param externalRedis.enabled Enable use of an external Redis server
+externalRedis:
+  enabled: false
+
+  ## @param externalRedis.host Hostname or IP address of external Redis server
+  host: ""
+
+  ## @param externalRedis.port Redis server port
+  port: 6379
+
+  ## @param externalRedis.username Redis username
+  username: ""
+
+  ## @param externalRedis.password Redis password
+  password: ""
+
+  ## @param externalRedis.existingSecret Existing secret containing Redis credentials
+  existingSecret: ""
+
+  ## @param externalRedis.usernameKey Key containing the Redis username
+  usernameKey: username
+
+  ## @param externalRedis.passwordKey Key containing the Redis password
+  passwordKey: password

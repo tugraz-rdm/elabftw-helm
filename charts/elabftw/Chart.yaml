@@ -20,6 +20,10 @@ dependencies:
     condition: mysql.enabled
     repository: "oci://registry-1.docker.io/bitnamicharts"
     version: "14.0.3"
+  - name: redis
+    condition: redis.enabled
+    repository: "oci://registry-1.docker.io/bitnamicharts"
+    version: "18.12.0"
 maintainers:
   - name: tugraz-rdm
     url: https://github.com/tugraz-rdm/elabftw-helm

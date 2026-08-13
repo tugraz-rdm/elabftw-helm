@@ -208,7 +208,8 @@ spec:
             - name: USE_PERSISTENT_MYSQL_CONN
               value: {{ .Values.elabftw.database.persistentConnection | quote }}
 
-{{- if .Values.elabftw.redis.enabled }}
+
+{{- if or .Values.redis.enabled .Values.externalRedis.enabled }}
 
             ################
             # REDIS
@@ -218,23 +219,23 @@ spec:
               value: "true"
 
             - name: REDIS_HOST
-              value: {{ .Values.elabftw.redis.host | quote }}
+              value: {{ if .Values.redis.enabled }}{{ printf "%s-redis-master" (include "elabftw.fullname" .) | quote }}{{ else }}{{ .Values.externalRedis.host | quote }}{{ end }}
 
             - name: REDIS_PORT
-              value: {{ .Values.elabftw.redis.port | quote }}
+              value: {{ if .Values.redis.enabled }}"6379"{{ else }}{{ .Values.externalRedis.port | quote }}{{ end }}
 
-{{- if .Values.elabftw.redis.username }}
+{{- if and .Values.externalRedis.enabled .Values.externalRedis.username }}
 
             - name: REDIS_USERNAME
-              value: {{ .Values.elabftw.redis.username | quote }}
+              value: {{ .Values.externalRedis.username | quote }}
 
 {{- end }}
 
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ default (printf "%s-secret" (include "elabftw.fullname" .)) .Values.elabftw.redis.existingSecret }}
-                  key: {{ .Values.elabftw.redis.passwordKey }}
+                  name: {{ if .Values.redis.enabled }}{{ default (printf "%s-redis" (include "elabftw.fullname" .)) .Values.redis.auth.existingSecret }}{{ else }}{{ default (printf "%s-external-redis" (include "elabftw.fullname" .)) .Values.externalRedis.existingSecret }}{{ end }}
+                  key: {{ if .Values.redis.enabled }}{{ default "redis-password" .Values.redis.auth.existingSecretPasswordKey }}{{ else }}{{ default "password" .Values.externalRedis.passwordKey }}{{ end }}
 
 {{- else }}
 
