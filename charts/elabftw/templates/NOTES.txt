@@ -70,6 +70,18 @@ Configuration:
       Database: {{ .Values.externalDatabase.database }}
 {{- end }}
 
+  Redis:
+    Enabled: {{ or .Values.redis.enabled .Values.externalRedis.enabled }}
+    Mode: {{ if .Values.redis.enabled }}Internal{{ else if .Values.externalRedis.enabled }}External{{ else }}Disabled{{ end }}
+
+{{- if .Values.redis.enabled }}
+    Redis service:
+      {{ include "elabftw.fullname" . }}-redis.{{ .Release.Namespace }}.svc.cluster.local:6379
+{{- else if .Values.externalRedis.enabled }}
+    Redis host:
+      {{ .Values.externalRedis.host }}
+{{- end }}
+
   Addons:
 
     Chem plugin enabled: {{ .Values.addons.chemPlugin.enabled }}
@@ -77,4 +89,11 @@ Configuration:
 {{- if .Values.addons.chemPlugin.enabled }}
     Chem plugin service:
       {{ include "elabftw.fullname" . }}-chem-plugin.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.addons.chemPlugin.service.port }}
+{{- end }}
+
+    OpenCloning enabled: {{ .Values.addons.opencloning.enabled }}
+
+{{- if .Values.addons.opencloning.enabled }}
+    OpenCloning service:
+      {{ include "elabftw.fullname" . }}-opencloning.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.addons.opencloning.service.port }}
 {{- end }}

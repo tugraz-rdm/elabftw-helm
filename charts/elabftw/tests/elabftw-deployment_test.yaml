@@ -143,13 +143,11 @@ tests:
             name: USE_REDIS
             value: "false"
 
-  - it: enables redis when configured
+  - it: enables internal redis
     set:
-      elabftw.redis.enabled: true
-      elabftw.redis.host: redis-test
-      elabftw.redis.port: 6380
-      elabftw.redis.passwordKey: redis-password
-      elabftw.redis.existingSecret: redis-secret
+      redis.enabled: true
+      redis.auth.enabled: true
+      redis.auth.password: redisPassword
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
@@ -161,13 +159,115 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: REDIS_HOST
-            value: redis-test
+            value: test-elabftw-redis-master
+
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDIS_PORT
+            value: "6379"
+
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: test-elabftw-redis
+                key: redis-password
+
+  - it: uses existing secret for internal redis
+    set:
+      redis.enabled: true
+      redis.auth.enabled: true
+      redis.auth.existingSecret: custom-redis-secret
+      redis.auth.existingSecretPasswordKey: redis-password
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: USE_REDIS
+            value: "true"
+
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: custom-redis-secret
+                key: redis-password
+
+  - it: enables external redis
+    set:
+      redis.enabled: false
+      externalRedis.enabled: true
+      externalRedis.host: redis.example.com
+      externalRedis.port: 6380
+      externalRedis.passwordKey: password
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: USE_REDIS
+            value: "true"
+
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDIS_HOST
+            value: redis.example.com
 
       - contains:
           path: spec.template.spec.containers[0].env
           content:
             name: REDIS_PORT
             value: "6380"
+
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: test-elabftw-external-redis
+                key: password
+
+  - it: uses existing secret for external redis
+    set:
+      redis.enabled: false
+      externalRedis.enabled: true
+      externalRedis.host: redis.example.com
+      externalRedis.port: 6379
+      externalRedis.existingSecret: custom-external-redis-secret
+      externalRedis.passwordKey: redis-password
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: USE_REDIS
+            value: "true"
+
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: custom-external-redis-secret
+                key: redis-password
+
+  - it: does not expose internal redis password as plain environment value
+    set:
+      redis.enabled: true
+      redis.auth.enabled: true
+      redis.auth.password: redisPassword
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDIS_PASSWORD
+            value: redisPassword
 
   - it: mounts persistent volume when enabled
     asserts:
@@ -262,7 +362,6 @@ tests:
             name: FINGERPRINTER_URL
             value: "http://chem-plugin:8000/"
 
-
   - it: does not configure opencloning when disabled
     set:
       addons.opencloning.enabled: false
@@ -271,7 +370,6 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: OPENCLONING_URL
-
 
   - it: configures opencloning when enabled
     set:

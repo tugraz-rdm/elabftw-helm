@@ -32,13 +32,6 @@
 | `elabftw.features.demoMode`                           | Enable demo mode with automatic login for demo users                                                             | `false`               |
 | `elabftw.features.maintenanceMode`                    | Enable maintenance mode and disable user interaction                                                             | `false`               |
 | `elabftw.database.persistentConnection`               | Enable persistent MySQL database connections                                                                     | `true`                |
-| `elabftw.redis.enabled`                               | Enable Redis support for PHP session storage                                                                     | `false`               |
-| `elabftw.redis.host`                                  | Redis server hostname or IP address                                                                              | `redis`               |
-| `elabftw.redis.port`                                  | Redis server port                                                                                                | `6379`                |
-| `elabftw.redis.username`                              | Redis username                                                                                                   | `""`                  |
-| `elabftw.redis.password`                              | Redis password                                                                                                   | `""`                  |
-| `elabftw.redis.existingSecret`                        |                                                                                                                  | `""`                  |
-| `elabftw.redis.passwordKey`                           | Key containing the Redis password in the existing secret                                                         | `password`            |
 | `elabftw.extraEnv`                                    | Additional environment variables passed to the container                                                         | `[]`                  |
 | `elabftw.secrets.existingSecret`                      |                                                                                                                  | `""`                  |
 | `elabftw.secrets.secretKey`                           |                                                                                                                  | `""`                  |
@@ -152,6 +145,35 @@
 | `addons.opencloning.nodeSelector`                           | Node selector constraints                           | `{}`                         |
 | `addons.opencloning.tolerations`                            | Pod tolerations                                     | `[]`                         |
 | `addons.opencloning.affinity`                               | Pod affinity rules                                  | `{}`                         |
+
+### Internal Redis
+
+| Name                                   | Description                                                | Value                 |
+| -------------------------------------- | ---------------------------------------------------------- | --------------------- |
+| `redis.enabled`                        | Deploy an internal Redis instance and enable Redis support | `false`               |
+| `redis.image.registry`                 | Redis image registry                                       | `docker.io`           |
+| `redis.image.repository`               | Redis image repository                                     | `bitnamilegacy/redis` |
+| `redis.image.tag`                      | Redis image tag                                            | `8.2.1-debian-12-r0`  |
+| `redis.image.digest`                   | Redis image digest                                         | `""`                  |
+| `redis.auth.enabled`                   | Enable Redis authentication                                | `true`                |
+| `redis.auth.password`                  | Redis password                                             | `""`                  |
+| `redis.auth.existingSecret`            | Existing secret containing the Redis password              | `""`                  |
+| `redis.auth.existingSecretPasswordKey` | Key containing the Redis password in the existing secret   | `redis-password`      |
+| `redis.master.persistence.enabled`     | Enable persistent storage for Redis                        | `true`                |
+| `redis.master.persistence.size`        | Persistent volume size for Redis                           | `1Gi`                 |
+
+### External Redis
+
+| Name                           | Description                                     | Value      |
+| ------------------------------ | ----------------------------------------------- | ---------- |
+| `externalRedis.enabled`        | Enable use of an external Redis server          | `false`    |
+| `externalRedis.host`           | Hostname or IP address of external Redis server | `""`       |
+| `externalRedis.port`           | Redis server port                               | `6379`     |
+| `externalRedis.username`       | Redis username                                  | `""`       |
+| `externalRedis.password`       | Redis password                                  | `""`       |
+| `externalRedis.existingSecret` | Existing secret containing Redis credentials    | `""`       |
+| `externalRedis.usernameKey`    | Key containing the Redis username               | `username` |
+| `externalRedis.passwordKey`    | Key containing the Redis password               | `password` |
 
 This Helm chart is distributed as an **OCI-based Helm chart** using **GitHub Container Registry (GHCR)**.
 

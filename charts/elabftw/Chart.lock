@@ -2,5 +2,8 @@ dependencies:
 - name: mysql
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 14.0.3
-digest: sha256:9840388108762288281c1ffe292f57ed3b39c7cedb083d23aba333c5a2403849
-generated: "2026-07-30T15:10:43.912769211+02:00"
+- name: redis
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 18.12.0
+digest: sha256:0ef635bfe573776e1713997ecba16fe56836ca354c0ecb33ae854bcc87736e99
+generated: "2026-08-13T13:04:12.145033056+02:00"
