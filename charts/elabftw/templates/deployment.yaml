@@ -32,11 +32,24 @@ spec:
 {{- end }}
 
     spec:
+      securityContext:
+        runAsUser: {{ .Values.elabftw.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.elabftw.securityContext.runAsGroup }}
+        runAsNonRoot: true
+        fsGroup: {{ .Values.elabftw.securityContext.fsGroup }}
+
       containers:
         - name: {{ include "elabftw.name" . }}
 
           image: "{{ .Values.elabftw.image.repository }}:{{ .Values.elabftw.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.elabftw.image.pullPolicy }}
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
 
           ports:
             - name: http
@@ -71,35 +84,6 @@ spec:
 
             - name: USE_OPENCLONING
               value: "true"
-
-
-{{- end }}
-
-{{- if .Values.addons.chemPlugin.enabled }}
-
-            ################
-            # CHEM PLUGIN
-            ################
-
-{{- if .Values.addons.chemPlugin.indigo.enabled }}
-
-            - name: USE_INDIGO
-              value: "true"
-
-            - name: INDIGO_URL
-              value: {{ .Values.addons.chemPlugin.indigo.url | quote }}
-
-{{- end }}
-
-{{- if .Values.addons.chemPlugin.fingerprinter.enabled }}
-
-            - name: USE_FINGERPRINTER
-              value: "true"
-
-            - name: FINGERPRINTER_URL
-              value: {{ .Values.addons.chemPlugin.fingerprinter.url | quote }}
-
-{{- end }}
 
 {{- end }}
 
@@ -141,17 +125,8 @@ spec:
             - name: SITE_URL
               value: {{ .Values.elabftw.siteUrl | quote }}
 
-            - name: SERVER_NAME
-              value: {{ .Values.elabftw.serverName | quote }}
-
             - name: DISABLE_HTTPS
               value: {{ .Values.elabftw.disableHttps | quote }}
-
-            - name: ENABLE_LETSENCRYPT
-              value: {{ .Values.elabftw.enableLetsencrypt | quote }}
-
-            - name: ENABLE_IPV6
-              value: "false"
 
             - name: SET_REAL_IP
               value: "false"
@@ -208,7 +183,6 @@ spec:
             - name: USE_PERSISTENT_MYSQL_CONN
               value: {{ .Values.elabftw.database.persistentConnection | quote }}
 
-
 {{- if or .Values.redis.enabled .Values.externalRedis.enabled }}
 
             ################
@@ -253,14 +227,56 @@ spec:
 {{- if .Values.elabftw.persistence.enabled }}
 
           volumeMounts:
+
+            # Writable runtime filesystem required by s6-overlay
+            - name: run
+              mountPath: /run
+
+            # Existing PVC.
+            # The root contains the existing v5 upload directories.
             - name: data
-              mountPath: {{ .Values.elabftw.persistence.mountPath }}
+              mountPath: /var/lib/elabftw/uploads
+
+            # eLabFTW exports.
+            # PVC: /exports -> container: /var/lib/elabftw/exports
+            - name: data
+              mountPath: /var/lib/elabftw/exports
+              subPath: exports
+
+            # eLabFTW cache.
+            # PVC: /cache -> container: /var/cache/elabftw
+            - name: data
+              mountPath: /var/cache/elabftw
+              subPath: cache
+
+{{- else }}
+
+          volumeMounts:
+
+            # Writable runtime filesystem required by s6-overlay
+            - name: run
+              mountPath: /run
 
 {{- end }}
 
-{{- if .Values.elabftw.persistence.enabled }}
 
       volumes:
+
+        # Writable runtime filesystem.
+        # Required because the container root filesystem is read-only.
+        - name: run
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+
+{{- if .Values.elabftw.persistence.enabled }}
+
+        # Single existing PVC containing:
+        #
+        # /                         -> /var/lib/elabftw/uploads
+        # /cache                    -> /var/cache/elabftw
+        # /exports                  -> /var/lib/elabftw/exports
+        #
         - name: data
           persistentVolumeClaim:
             claimName: {{ default (printf "%s-pvc" (include "elabftw.fullname" .)) .Values.elabftw.persistence.existingClaim }}

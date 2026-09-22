@@ -269,7 +269,7 @@ The tests verify that the templates in `templates/` render the expected Kubernet
 ### Install helm-unittest plugin
 
 ```bash
-helm plugin install https://github.com/helm-unittest/helm-unittest
+helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
 ```
 
 ### Run chart tests
