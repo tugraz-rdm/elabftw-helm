@@ -31,7 +31,7 @@
 | `elabftw.features.autoDbUpdate`                       | Automatically update the database structure on container start                                                   | `false`               |
 | `elabftw.features.demoMode`                           | Enable demo mode with automatic login for demo users                                                             | `false`               |
 | `elabftw.features.maintenanceMode`                    | Enable maintenance mode and disable user interaction                                                             | `false`               |
-| `elabftw.database.persistentConnection`               | Enable persistent MySQL database connections                                                                     | `true`                |
+| `elabftw.database.persistentConnection`               | Enable persistent MySQL database connections                                                                     | `false`               |
 | `elabftw.extraEnv`                                    | Additional environment variables passed to the container                                                         | `[]`                  |
 | `elabftw.secrets.existingSecret`                      |                                                                                                                  | `""`                  |
 | `elabftw.secrets.secretKey`                           |                                                                                                                  | `""`                  |
@@ -41,10 +41,10 @@
 | `elabftw.image.pullPolicy`                            | Container image pull policy                                                                                      | `IfNotPresent`        |
 | `elabftw.nameOverride`                                | Override the generated resource name                                                                             | `""`                  |
 | `elabftw.fullnameOverride`                            | Override the full generated resource name                                                                        | `""`                  |
-| `elabftw.container.port`                              | Container port exposed by the eLabFTW image                                                                      | `443`                 |
+| `elabftw.container.port`                              | Container port exposed by the eLabFTW v6 image                                                                   | `8080`                |
 | `elabftw.service.type`                                | Kubernetes service type                                                                                          | `ClusterIP`           |
-| `elabftw.service.port`                                | Kubernetes service port                                                                                          | `443`                 |
-| `elabftw.service.targetPort`                          | Container port targeted by the service                                                                           | `443`                 |
+| `elabftw.service.port`                                | Kubernetes service port                                                                                          | `8080`                |
+| `elabftw.service.targetPort`                          | Container port targeted by the service                                                                           | `8080`                |
 | `elabftw.ingress.enabled`                             | Enable Kubernetes ingress                                                                                        | `false`               |
 | `elabftw.ingress.className`                           | Ingress controller class name                                                                                    | `""`                  |
 | `elabftw.ingress.annotations`                         | Additional ingress annotations                                                                                   | `{}`                  |
@@ -52,12 +52,21 @@
 | `elabftw.ingress.path`                                | Path routed to eLabFTW                                                                                           | `/`                   |
 | `elabftw.ingress.pathType`                            | Kubernetes ingress path matching type                                                                            | `Prefix`              |
 | `elabftw.ingress.tls`                                 | TLS configuration for ingress                                                                                    | `[]`                  |
-| `elabftw.persistence.enabled`                         | Enable persistent storage for uploaded files                                                                     | `true`                |
+| `elabftw.securityContext.runAsNonRoot`                | Run the container as a non-root user                                                                             | `true`                |
+| `elabftw.securityContext.runAsUser`                   | User ID used to run the container                                                                                | `1002`                |
+| `elabftw.securityContext.runAsGroup`                  | Group ID used to run the container                                                                               | `100`                 |
+| `elabftw.securityContext.allowPrivilegeEscalation`    | Prevent privilege escalation                                                                                     | `false`               |
+| `elabftw.securityContext.readOnlyRootFilesystem`      | Mount the container root filesystem as read-only                                                                 | `true`                |
+| `elabftw.securityContext.capabilities.drop`           | Linux capabilities to drop from the container                                                                    | `["ALL"]`             |
+| `elabftw.podSecurityContext.fsGroup`                  | Filesystem group ID for mounted volumes                                                                          | `100`                 |
+| `elabftw.podSecurityContext.fsGroupChangePolicy`      | Policy controlling when volume ownership is changed                                                              | `OnRootMismatch`      |
+| `elabftw.podSecurityContext.seccompProfile.type`      | Seccomp profile type                                                                                             | `RuntimeDefault`      |
+| `elabftw.persistence.enabled`                         | Enable persistent storage for eLabFTW files                                                                      | `true`                |
 | `elabftw.persistence.existingClaim`                   | Use an existing persistent volume claim                                                                          | `""`                  |
-| `elabftw.persistence.accessMode`                      |                                                                                                                  | `ReadWriteMany`       |
+| `elabftw.persistence.accessMode`                      | Persistent volume access mode                                                                                    | `ReadWriteMany`       |
 | `elabftw.persistence.storageClass`                    | Storage class for persistent volume                                                                              | `""`                  |
 | `elabftw.persistence.size`                            | Persistent volume size                                                                                           | `10Gi`                |
-| `elabftw.persistence.mountPath`                       | Path where uploaded files are mounted                                                                            | `/elabftw/uploads`    |
+| `elabftw.persistence.exportsPath`                     | Directory in the PVC containing exported files                                                                   | `exports`             |
 | `elabftw.resources`                                   | Kubernetes resource requests and limits                                                                          | `{}`                  |
 | `elabftw.podAnnotations`                              | Additional pod annotations                                                                                       | `{}`                  |
 | `elabftw.podLabels`                                   | Additional pod labels                                                                                            | `{}`                  |
@@ -269,7 +278,7 @@ The tests verify that the templates in `templates/` render the expected Kubernet
 ### Install helm-unittest plugin
 
 ```bash
-helm plugin install https://github.com/helm-unittest/helm-unittest
+helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
 ```
 
 ### Run chart tests
