@@ -76,7 +76,21 @@ elabftw:
 
   container:
     ## @param elabftw.container.port Container port exposed by the eLabFTW image
-    port: 443
+    port: 8080
+
+
+  securityContext:
+
+    ## IMPORTANT:
+    ## Replace these with the UID/GID of your elabftw-worker user.
+    ##
+    ## @param elabftw.securityContext.runAsUser Container user ID.
+    ## @param elabftw.securityContext.runAsGroup Container group ID.
+    ## @param elabftw.securityContext.fsGroup Filesystem group ID.
+
+    runAsUser: 1002
+    runAsGroup: 1002
+    fsGroup: 1002
 
   service:
     ## @param elabftw.service.type Kubernetes service type
@@ -84,7 +98,7 @@ elabftw:
     ## @param elabftw.service.port Kubernetes service port
     port: 443
     ## @param elabftw.service.targetPort Container port targeted by the service
-    targetPort: 443
+    targetPort: 8080
 
   ingress:
     ## @param elabftw.ingress.enabled Enable Kubernetes ingress
@@ -114,7 +128,12 @@ elabftw:
     ## @param elabftw.persistence.size Persistent volume size
     size: 10Gi
     ## @param elabftw.persistence.mountPath Path where uploaded files are mounted
-    mountPath: /elabftw/uploads
+    ## v6 application upload path.
+    ##
+    ## IMPORTANT:
+    ## This mounts the ROOT of the existing PVC here.
+    ## Do not use subPath: uploads.
+    mountPath: /var/lib/elabftw/uploads
 
   ## @param elabftw.resources Kubernetes resource requests and limits
   resources: {}
@@ -208,69 +227,6 @@ externalDatabase:
 ##
 
 addons:
-  ## @param addons.chemPlugin.enabled Deploy the eLabFTW chemistry plugin
-  ## @notice The chemPlugin is available in v5.5.x but was removed in v5.6.x.
-  chemPlugin:
-    enabled: false
-
-    ## @param addons.chemPlugin.replicaCount Number of chemistry plugin replicas
-    replicaCount: 1
-
-    image:
-      ## @param addons.chemPlugin.image.repository Container image repository
-      repository: elabftw/chem-plugin
-      ## @param addons.chemPlugin.image.tag Container image tag
-      tag: latest
-      ## @param addons.chemPlugin.image.pullPolicy Container image pull policy
-      pullPolicy: IfNotPresent
-
-    podSecurityContext:
-      ## @param addons.chemPlugin.podSecurityContext.runAsNonRoot Run containers as a non-root user
-      runAsNonRoot: true
-      ## @param addons.chemPlugin.podSecurityContext.runAsUser User ID used to run the container
-      runAsUser: 65534
-      seccompProfile:
-        ## @param addons.chemPlugin.podSecurityContext.seccompProfile.type Seccomp profile type
-        type: RuntimeDefault
-
-    indigo:
-      ## @param addons.chemPlugin.indigo.enabled Enable Indigo chemical structure editor integration
-      enabled: true
-      ## @param addons.chemPlugin.indigo.url Indigo service URL
-      url: http://chem-plugin/
-
-    fingerprinter:
-      ## @param addons.chemPlugin.fingerprinter.enabled Enable chemical fingerprint generation
-      enabled: true
-      ## @param addons.chemPlugin.fingerprinter.url Fingerprinter service URL
-      url: http://chem-plugin/
-
-    service:
-      ## @param addons.chemPlugin.service.type Kubernetes service type
-      type: ClusterIP
-      ## @param addons.chemPlugin.service.port Kubernetes service port
-      port: 80
-      ## @param addons.chemPlugin.service.targetPort Container port targeted by the service
-      targetPort: 8000
-
-    ## @param addons.chemPlugin.resources Kubernetes resource requests and limits
-    resources: {}
-
-    ## @param addons.chemPlugin.podAnnotations Additional pod annotations
-    podAnnotations: {}
-
-    ## @param addons.chemPlugin.podLabels Additional pod labels
-    podLabels: {}
-
-    ## @param addons.chemPlugin.nodeSelector Node selector constraints
-    nodeSelector: {}
-
-    ## @param addons.chemPlugin.tolerations Pod tolerations
-    tolerations: []
-
-    ## @param addons.chemPlugin.affinity Pod affinity rules
-    affinity: {}
-
   ## @param addons.opencloning.enabled Deploy the OpenCloning plugin
   opencloning:
     enabled: false
