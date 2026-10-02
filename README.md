@@ -16,57 +16,60 @@
 
 ### eLabFTW configuration
 
-| Name                                                  | Description                                                                                                      | Value                 |
-| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `elabftw.siteUrl`                                     | Canonical URL of the eLabFTW instance, including scheme and optional non-standard port. Use the user-facing URL. | `""`                  |
-| `elabftw.serverName`                                  | Server name used by the internal nginx configuration                                                             | `elabftw.example.com` |
-| `elabftw.disableHttps`                                | Disable HTTPS inside the container. Useful when TLS is terminated by an external reverse proxy.                  | `false`               |
-| `elabftw.enableLetsencrypt`                           | Enable automatic Let's Encrypt certificate handling. Has no effect when HTTPS is disabled.                       | `false`               |
-| `elabftw.uploads.maxSize`                             | Maximum size allowed for uploaded files                                                                          | `100M`                |
-| `elabftw.uploads.maxTime`                             | Maximum upload time in milliseconds                                                                              | `900000`              |
-| `elabftw.php.memoryLimit`                             | Maximum amount of memory available to PHP scripts                                                                | `256M`                |
-| `elabftw.php.maxChildren`                             | Maximum number of PHP-FPM child processes                                                                        | `50`                  |
-| `elabftw.php.maxExecutionTime`                        | Maximum execution time of PHP scripts in seconds                                                                 | `300`                 |
-| `elabftw.features.autoDbInit`                         | Automatically install the database structure on container start                                                  | `false`               |
-| `elabftw.features.autoDbUpdate`                       | Automatically update the database structure on container start                                                   | `false`               |
-| `elabftw.features.demoMode`                           | Enable demo mode with automatic login for demo users                                                             | `false`               |
-| `elabftw.features.maintenanceMode`                    | Enable maintenance mode and disable user interaction                                                             | `false`               |
-| `elabftw.database.persistentConnection`               | Enable persistent MySQL database connections                                                                     | `true`                |
-| `elabftw.extraEnv`                                    | Additional environment variables passed to the container                                                         | `[]`                  |
-| `elabftw.secrets.existingSecret`                      |                                                                                                                  | `""`                  |
-| `elabftw.secrets.secretKey`                           |                                                                                                                  | `""`                  |
-| `elabftw.replicaCount`                                | Number of eLabFTW application replicas                                                                           | `1`                   |
-| `elabftw.image.repository`                            | Container image repository                                                                                       | `elabftw/elabimg`     |
-| `elabftw.image.tag`                                   | Container image tag                                                                                              | `""`                  |
-| `elabftw.image.pullPolicy`                            | Container image pull policy                                                                                      | `IfNotPresent`        |
-| `elabftw.nameOverride`                                | Override the generated resource name                                                                             | `""`                  |
-| `elabftw.fullnameOverride`                            | Override the full generated resource name                                                                        | `""`                  |
-| `elabftw.container.port`                              | Container port exposed by the eLabFTW image                                                                      | `443`                 |
-| `elabftw.service.type`                                | Kubernetes service type                                                                                          | `ClusterIP`           |
-| `elabftw.service.port`                                | Kubernetes service port                                                                                          | `443`                 |
-| `elabftw.service.targetPort`                          | Container port targeted by the service                                                                           | `443`                 |
-| `elabftw.ingress.enabled`                             | Enable Kubernetes ingress                                                                                        | `false`               |
-| `elabftw.ingress.className`                           | Ingress controller class name                                                                                    | `""`                  |
-| `elabftw.ingress.annotations`                         | Additional ingress annotations                                                                                   | `{}`                  |
-| `elabftw.ingress.host`                                | Hostname used by the ingress resource                                                                            | `elabftw.example.com` |
-| `elabftw.ingress.path`                                | Path routed to eLabFTW                                                                                           | `/`                   |
-| `elabftw.ingress.pathType`                            | Kubernetes ingress path matching type                                                                            | `Prefix`              |
-| `elabftw.ingress.tls`                                 | TLS configuration for ingress                                                                                    | `[]`                  |
-| `elabftw.persistence.enabled`                         | Enable persistent storage for uploaded files                                                                     | `true`                |
-| `elabftw.persistence.existingClaim`                   | Use an existing persistent volume claim                                                                          | `""`                  |
-| `elabftw.persistence.accessMode`                      |                                                                                                                  | `ReadWriteMany`       |
-| `elabftw.persistence.storageClass`                    | Storage class for persistent volume                                                                              | `""`                  |
-| `elabftw.persistence.size`                            | Persistent volume size                                                                                           | `10Gi`                |
-| `elabftw.persistence.mountPath`                       | Path where uploaded files are mounted                                                                            | `/elabftw/uploads`    |
-| `elabftw.resources`                                   | Kubernetes resource requests and limits                                                                          | `{}`                  |
-| `elabftw.podAnnotations`                              | Additional pod annotations                                                                                       | `{}`                  |
-| `elabftw.podLabels`                                   | Additional pod labels                                                                                            | `{}`                  |
-| `elabftw.nodeSelector`                                | Node selector constraints                                                                                        | `{}`                  |
-| `elabftw.tolerations`                                 | Pod tolerations                                                                                                  | `[]`                  |
-| `elabftw.affinity`                                    | Pod affinity rules                                                                                               | `{}`                  |
-| `elabftw.updateStrategy.type`                         | Deployment update strategy. Valid values: RollingUpdate, Recreate.                                               | `RollingUpdate`       |
-| `elabftw.updateStrategy.rollingUpdate.maxUnavailable` | Maximum number of Pods that can be unavailable during a RollingUpdate. Integer or percentage.                    | `0`                   |
-| `elabftw.updateStrategy.rollingUpdate.maxSurge`       | Maximum number of extra Pods that can be created during a RollingUpdate. Integer or percentage.                  | `1`                   |
+| Name                                                  | Description                                                                                                      | Value                      |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `elabftw.siteUrl`                                     | Canonical URL of the eLabFTW instance, including scheme and optional non-standard port. Use the user-facing URL. | `""`                       |
+| `elabftw.serverName`                                  | Server name used by the internal nginx configuration                                                             | `elabftw.example.com`      |
+| `elabftw.disableHttps`                                | Disable HTTPS inside the container. Useful when TLS is terminated by an external reverse proxy.                  | `false`                    |
+| `elabftw.enableLetsencrypt`                           | Enable automatic Let's Encrypt certificate handling. Has no effect when HTTPS is disabled.                       | `false`                    |
+| `elabftw.uploads.maxSize`                             | Maximum size allowed for uploaded files                                                                          | `100M`                     |
+| `elabftw.uploads.maxTime`                             | Maximum upload time in milliseconds                                                                              | `900000`                   |
+| `elabftw.php.memoryLimit`                             | Maximum amount of memory available to PHP scripts                                                                | `256M`                     |
+| `elabftw.php.maxChildren`                             | Maximum number of PHP-FPM child processes                                                                        | `50`                       |
+| `elabftw.php.maxExecutionTime`                        | Maximum execution time of PHP scripts in seconds                                                                 | `300`                      |
+| `elabftw.features.autoDbInit`                         | Automatically install the database structure on container start                                                  | `false`                    |
+| `elabftw.features.autoDbUpdate`                       | Automatically update the database structure on container start                                                   | `false`                    |
+| `elabftw.features.demoMode`                           | Enable demo mode with automatic login for demo users                                                             | `false`                    |
+| `elabftw.features.maintenanceMode`                    | Enable maintenance mode and disable user interaction                                                             | `false`                    |
+| `elabftw.database.persistentConnection`               | Enable persistent MySQL database connections                                                                     | `true`                     |
+| `elabftw.extraEnv`                                    | Additional environment variables passed to the container                                                         | `[]`                       |
+| `elabftw.secrets.existingSecret`                      |                                                                                                                  | `""`                       |
+| `elabftw.secrets.secretKey`                           |                                                                                                                  | `""`                       |
+| `elabftw.replicaCount`                                | Number of eLabFTW application replicas                                                                           | `1`                        |
+| `elabftw.image.repository`                            | Container image repository                                                                                       | `elabftw/elabimg`          |
+| `elabftw.image.tag`                                   | Container image tag                                                                                              | `""`                       |
+| `elabftw.image.pullPolicy`                            | Container image pull policy                                                                                      | `IfNotPresent`             |
+| `elabftw.nameOverride`                                | Override the generated resource name                                                                             | `""`                       |
+| `elabftw.fullnameOverride`                            | Override the full generated resource name                                                                        | `""`                       |
+| `elabftw.container.port`                              | Container port exposed by the eLabFTW image                                                                      | `8080`                     |
+| `elabftw.securityContext.runAsUser`                   | Container user ID.                                                                                               | `1002`                     |
+| `elabftw.securityContext.runAsGroup`                  | Container group ID.                                                                                              | `1002`                     |
+| `elabftw.securityContext.fsGroup`                     | Filesystem group ID.                                                                                             | `1002`                     |
+| `elabftw.service.type`                                | Kubernetes service type                                                                                          | `ClusterIP`                |
+| `elabftw.service.port`                                | Kubernetes service port                                                                                          | `443`                      |
+| `elabftw.service.targetPort`                          | Container port targeted by the service                                                                           | `8080`                     |
+| `elabftw.ingress.enabled`                             | Enable Kubernetes ingress                                                                                        | `false`                    |
+| `elabftw.ingress.className`                           | Ingress controller class name                                                                                    | `""`                       |
+| `elabftw.ingress.annotations`                         | Additional ingress annotations                                                                                   | `{}`                       |
+| `elabftw.ingress.host`                                | Hostname used by the ingress resource                                                                            | `elabftw.example.com`      |
+| `elabftw.ingress.path`                                | Path routed to eLabFTW                                                                                           | `/`                        |
+| `elabftw.ingress.pathType`                            | Kubernetes ingress path matching type                                                                            | `Prefix`                   |
+| `elabftw.ingress.tls`                                 | TLS configuration for ingress                                                                                    | `[]`                       |
+| `elabftw.persistence.enabled`                         | Enable persistent storage for uploaded files                                                                     | `true`                     |
+| `elabftw.persistence.existingClaim`                   | Use an existing persistent volume claim                                                                          | `""`                       |
+| `elabftw.persistence.accessMode`                      |                                                                                                                  | `ReadWriteMany`            |
+| `elabftw.persistence.storageClass`                    | Storage class for persistent volume                                                                              | `""`                       |
+| `elabftw.persistence.size`                            | Persistent volume size                                                                                           | `10Gi`                     |
+| `elabftw.persistence.mountPath`                       | Path where uploaded files are mounted                                                                            | `/var/lib/elabftw/uploads` |
+| `elabftw.resources`                                   | Kubernetes resource requests and limits                                                                          | `{}`                       |
+| `elabftw.podAnnotations`                              | Additional pod annotations                                                                                       | `{}`                       |
+| `elabftw.podLabels`                                   | Additional pod labels                                                                                            | `{}`                       |
+| `elabftw.nodeSelector`                                | Node selector constraints                                                                                        | `{}`                       |
+| `elabftw.tolerations`                                 | Pod tolerations                                                                                                  | `[]`                       |
+| `elabftw.affinity`                                    | Pod affinity rules                                                                                               | `{}`                       |
+| `elabftw.updateStrategy.type`                         | Deployment update strategy. Valid values: RollingUpdate, Recreate.                                               | `RollingUpdate`            |
+| `elabftw.updateStrategy.rollingUpdate.maxUnavailable` | Maximum number of Pods that can be unavailable during a RollingUpdate. Integer or percentage.                    | `0`                        |
+| `elabftw.updateStrategy.rollingUpdate.maxSurge`       | Maximum number of extra Pods that can be created during a RollingUpdate. Integer or percentage.                  | `1`                        |
 
 ### Internal MySQL
 
@@ -100,51 +103,30 @@
 
 ### Addons
 
-| Name                                                        | Description                                         | Value                        |
-| ----------------------------------------------------------- | --------------------------------------------------- | ---------------------------- |
-| `addons.chemPlugin.enabled`                                 | Deploy the eLabFTW chemistry plugin                 | `false`                      |
-| `addons.chemPlugin.replicaCount`                            | Number of chemistry plugin replicas                 | `1`                          |
-| `addons.chemPlugin.image.repository`                        | Container image repository                          | `elabftw/chem-plugin`        |
-| `addons.chemPlugin.image.tag`                               | Container image tag                                 | `latest`                     |
-| `addons.chemPlugin.image.pullPolicy`                        | Container image pull policy                         | `IfNotPresent`               |
-| `addons.chemPlugin.podSecurityContext.runAsNonRoot`         | Run containers as a non-root user                   | `true`                       |
-| `addons.chemPlugin.podSecurityContext.runAsUser`            | User ID used to run the container                   | `65534`                      |
-| `addons.chemPlugin.podSecurityContext.seccompProfile.type`  | Seccomp profile type                                | `RuntimeDefault`             |
-| `addons.chemPlugin.indigo.enabled`                          | Enable Indigo chemical structure editor integration | `true`                       |
-| `addons.chemPlugin.indigo.url`                              | Indigo service URL                                  | `http://chem-plugin/`        |
-| `addons.chemPlugin.fingerprinter.enabled`                   | Enable chemical fingerprint generation              | `true`                       |
-| `addons.chemPlugin.fingerprinter.url`                       | Fingerprinter service URL                           | `http://chem-plugin/`        |
-| `addons.chemPlugin.service.type`                            | Kubernetes service type                             | `ClusterIP`                  |
-| `addons.chemPlugin.service.port`                            | Kubernetes service port                             | `80`                         |
-| `addons.chemPlugin.service.targetPort`                      | Container port targeted by the service              | `8000`                       |
-| `addons.chemPlugin.resources`                               | Kubernetes resource requests and limits             | `{}`                         |
-| `addons.chemPlugin.podAnnotations`                          | Additional pod annotations                          | `{}`                         |
-| `addons.chemPlugin.podLabels`                               | Additional pod labels                               | `{}`                         |
-| `addons.chemPlugin.nodeSelector`                            | Node selector constraints                           | `{}`                         |
-| `addons.chemPlugin.tolerations`                             | Pod tolerations                                     | `[]`                         |
-| `addons.chemPlugin.affinity`                                | Pod affinity rules                                  | `{}`                         |
-| `addons.opencloning.enabled`                                | Deploy the OpenCloning plugin                       | `false`                      |
-| `addons.opencloning.replicaCount`                           | Number of OpenCloning plugin replicas               | `1`                          |
-| `addons.opencloning.image.repository`                       | Container image repository                          | `manulera/opencloning`       |
-| `addons.opencloning.image.tag`                              | Container image tag                                 | `v1.3.1-baseurl-opencloning` |
-| `addons.opencloning.image.pullPolicy`                       | Container image pull policy                         | `IfNotPresent`               |
-| `addons.opencloning.podSecurityContext.runAsNonRoot`        | Run containers as a non-root user                   | `true`                       |
-| `addons.opencloning.podSecurityContext.runAsUser`           | User ID used to run the container                   | `1000`                       |
-| `addons.opencloning.podSecurityContext.seccompProfile.type` | Seccomp profile type                                | `RuntimeDefault`             |
-| `addons.opencloning.allowedOrigins`                         | Allowed CORS origins                                | `*`                          |
-| `addons.opencloning.rootPath`                               | Base path where OpenCloning is served               | `/opencloning`               |
-| `addons.opencloning.backendUrl`                             | Backend URL exposed to the frontend                 | `/opencloning/`              |
-| `addons.opencloning.showAppBar`                             | Show the application navigation bar                 | `false`                      |
-| `addons.opencloning.url`                                    | OpenCloning service URL used by eLabFTW             | `http://opencloning/`        |
-| `addons.opencloning.service.type`                           | Kubernetes service type                             | `ClusterIP`                  |
-| `addons.opencloning.service.port`                           | Kubernetes service port                             | `80`                         |
-| `addons.opencloning.service.targetPort`                     | Container port targeted by the service              | `8000`                       |
-| `addons.opencloning.resources`                              | Kubernetes resource requests and limits             | `{}`                         |
-| `addons.opencloning.podAnnotations`                         | Additional pod annotations                          | `{}`                         |
-| `addons.opencloning.podLabels`                              | Additional pod labels                               | `{}`                         |
-| `addons.opencloning.nodeSelector`                           | Node selector constraints                           | `{}`                         |
-| `addons.opencloning.tolerations`                            | Pod tolerations                                     | `[]`                         |
-| `addons.opencloning.affinity`                               | Pod affinity rules                                  | `{}`                         |
+| Name                                                        | Description                             | Value                        |
+| ----------------------------------------------------------- | --------------------------------------- | ---------------------------- |
+| `addons.opencloning.enabled`                                | Deploy the OpenCloning plugin           | `false`                      |
+| `addons.opencloning.replicaCount`                           | Number of OpenCloning plugin replicas   | `1`                          |
+| `addons.opencloning.image.repository`                       | Container image repository              | `manulera/opencloning`       |
+| `addons.opencloning.image.tag`                              | Container image tag                     | `v1.3.1-baseurl-opencloning` |
+| `addons.opencloning.image.pullPolicy`                       | Container image pull policy             | `IfNotPresent`               |
+| `addons.opencloning.podSecurityContext.runAsNonRoot`        | Run containers as a non-root user       | `true`                       |
+| `addons.opencloning.podSecurityContext.runAsUser`           | User ID used to run the container       | `1000`                       |
+| `addons.opencloning.podSecurityContext.seccompProfile.type` | Seccomp profile type                    | `RuntimeDefault`             |
+| `addons.opencloning.allowedOrigins`                         | Allowed CORS origins                    | `*`                          |
+| `addons.opencloning.rootPath`                               | Base path where OpenCloning is served   | `/opencloning`               |
+| `addons.opencloning.backendUrl`                             | Backend URL exposed to the frontend     | `/opencloning/`              |
+| `addons.opencloning.showAppBar`                             | Show the application navigation bar     | `false`                      |
+| `addons.opencloning.url`                                    | OpenCloning service URL used by eLabFTW | `http://opencloning/`        |
+| `addons.opencloning.service.type`                           | Kubernetes service type                 | `ClusterIP`                  |
+| `addons.opencloning.service.port`                           | Kubernetes service port                 | `80`                         |
+| `addons.opencloning.service.targetPort`                     | Container port targeted by the service  | `8000`                       |
+| `addons.opencloning.resources`                              | Kubernetes resource requests and limits | `{}`                         |
+| `addons.opencloning.podAnnotations`                         | Additional pod annotations              | `{}`                         |
+| `addons.opencloning.podLabels`                              | Additional pod labels                   | `{}`                         |
+| `addons.opencloning.nodeSelector`                           | Node selector constraints               | `{}`                         |
+| `addons.opencloning.tolerations`                            | Pod tolerations                         | `[]`                         |
+| `addons.opencloning.affinity`                               | Pod affinity rules                      | `{}`                         |
 
 ### Internal Redis
 

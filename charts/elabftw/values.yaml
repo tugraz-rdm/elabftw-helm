@@ -80,10 +80,14 @@ elabftw:
 
 
   securityContext:
+
     ## IMPORTANT:
     ## Replace these with the UID/GID of your elabftw-worker user.
     ##
-    ## The official v6 documentation gives 995:981 only as an example.
+    ## @param elabftw.securityContext.runAsUser Container user ID.
+    ## @param elabftw.securityContext.runAsGroup Container group ID.
+    ## @param elabftw.securityContext.fsGroup Filesystem group ID.
+
     runAsUser: 1002
     runAsGroup: 1002
     fsGroup: 1002
