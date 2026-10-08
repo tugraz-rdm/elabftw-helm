@@ -5,41 +5,43 @@ Thank you for installing {{ include "elabftw.fullname" . }}.
 Application URL:
 
 {{- if .Values.elabftw.ingress.tls }}
-https://{{ .Values.elabftw.ingress.host }}{{ .Values.elabftw.ingress.path }}
+  https://{{ .Values.elabftw.ingress.host }}{{ .Values.elabftw.ingress.path }}
 {{- else }}
-http://{{ .Values.elabftw.ingress.host }}{{ .Values.elabftw.ingress.path }}
+  http://{{ .Values.elabftw.ingress.host }}{{ .Values.elabftw.ingress.path }}
 {{- end }}
 
 {{- else if eq .Values.elabftw.service.type "NodePort" }}
 
-Get the application URL by running:
+To access the application, run:
 
-  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} \
-    -o jsonpath="{.spec.ports[0].nodePort}" \
-    services {{ include "elabftw.fullname" . }})
+  export NODE_PORT=$(kubectl get svc {{ include "elabftw.fullname" . }} \
+    --namespace {{ .Release.Namespace }} \
+    -o jsonpath='{.spec.ports[0].nodePort}')
 
   export NODE_IP=$(kubectl get nodes \
-    --namespace {{ .Release.Namespace }} \
-    -o jsonpath="{.items[0].status.addresses[0].address}")
+    -o jsonpath='{.items[0].status.addresses[0].address}')
 
-  echo http://$NODE_IP:$NODE_PORT
+  echo "http://$NODE_IP:$NODE_PORT"
 
 {{- else if eq .Values.elabftw.service.type "LoadBalancer" }}
 
-Get the application URL by running:
+The application is exposed through a LoadBalancer service.
 
-  kubectl get svc --namespace {{ .Release.Namespace }} \
-    -w {{ include "elabftw.fullname" . }}
+Run:
+
+  kubectl get svc {{ include "elabftw.fullname" . }} \
+    --namespace {{ .Release.Namespace }}
 
 {{- else if eq .Values.elabftw.service.type "ClusterIP" }}
 
-The service is exposed internally as:
+The application is exposed internally at:
 
   {{ include "elabftw.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.elabftw.service.port }}
 
 To access it locally, run:
 
-  kubectl port-forward --namespace {{ .Release.Namespace }} \
+  kubectl port-forward \
+    --namespace {{ .Release.Namespace }} \
     svc/{{ include "elabftw.fullname" . }} \
     8080:{{ .Values.elabftw.service.port }}
 
@@ -56,44 +58,34 @@ Configuration:
 
   Persistence:
     Enabled: {{ .Values.elabftw.persistence.enabled }}
-    Mount path: {{ .Values.elabftw.persistence.mountPath }}
+{{- if .Values.elabftw.persistence.enabled }}
+    Claim: {{ default (printf "%s-pvc" (include "elabftw.fullname" .)) .Values.elabftw.persistence.existingClaim }}
+{{- end }}
 
   Database:
-    Internal MySQL enabled: {{ .Values.mysql.enabled }}
-
-{{- if .Values.mysql.enabled }}
-    MySQL database:
-      {{ .Values.mysql.auth.database }}
-{{- else }}
-    External MySQL:
-      Host: {{ .Values.externalDatabase.host }}
-      Database: {{ .Values.externalDatabase.database }}
-{{- end }}
+    {{- if .Values.mysql.enabled }}
+    Type: Internal MySQL
+    Database: {{ .Values.mysql.auth.database }}
+    {{- else }}
+    Type: External MySQL
+    Host: {{ .Values.externalDatabase.host }}
+    Database: {{ .Values.externalDatabase.database }}
+    {{- end }}
 
   Redis:
-    Enabled: {{ or .Values.redis.enabled .Values.externalRedis.enabled }}
-    Mode: {{ if .Values.redis.enabled }}Internal{{ else if .Values.externalRedis.enabled }}External{{ else }}Disabled{{ end }}
-
-{{- if .Values.redis.enabled }}
-    Redis service:
-      {{ include "elabftw.fullname" . }}-redis.{{ .Release.Namespace }}.svc.cluster.local:6379
-{{- else if .Values.externalRedis.enabled }}
-    Redis host:
-      {{ .Values.externalRedis.host }}
-{{- end }}
+    {{- if .Values.redis.enabled }}
+    Type: Internal
+    Service: {{ include "elabftw.fullname" . }}-redis.{{ .Release.Namespace }}.svc.cluster.local:6379
+    {{- else if .Values.externalRedis.enabled }}
+    Type: External
+    Host: {{ .Values.externalRedis.host }}:{{ .Values.externalRedis.port }}
+    {{- else }}
+    Type: Disabled
+    {{- end }}
 
   Addons:
 
-    Chem plugin enabled: {{ .Values.addons.chemPlugin.enabled }}
-
-{{- if .Values.addons.chemPlugin.enabled }}
-    Chem plugin service:
-      {{ include "elabftw.fullname" . }}-chem-plugin.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.addons.chemPlugin.service.port }}
-{{- end }}
-
-    OpenCloning enabled: {{ .Values.addons.opencloning.enabled }}
-
+    OpenCloning: {{ if .Values.addons.opencloning.enabled }}Enabled{{ else }}Disabled{{ end }}
 {{- if .Values.addons.opencloning.enabled }}
-    OpenCloning service:
-      {{ include "elabftw.fullname" . }}-opencloning.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.addons.opencloning.service.port }}
+    OpenCloning URL: {{ .Values.addons.opencloning.url }}
 {{- end }}

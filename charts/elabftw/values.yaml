@@ -47,7 +47,7 @@ elabftw:
 
   database:
     ## @param elabftw.database.persistentConnection Enable persistent MySQL database connections
-    persistentConnection: true
+    persistentConnection: false
 
   ## @param elabftw.extraEnv Additional environment variables passed to the container
   extraEnv: []
@@ -75,16 +75,16 @@ elabftw:
   fullnameOverride: ""
 
   container:
-    ## @param elabftw.container.port Container port exposed by the eLabFTW image
-    port: 443
+    ## @param elabftw.container.port Container port exposed by the eLabFTW v6 image
+    port: 8080
 
   service:
     ## @param elabftw.service.type Kubernetes service type
     type: ClusterIP
     ## @param elabftw.service.port Kubernetes service port
-    port: 443
+    port: 8080
     ## @param elabftw.service.targetPort Container port targeted by the service
-    targetPort: 443
+    targetPort: 8080
 
   ingress:
     ## @param elabftw.ingress.enabled Enable Kubernetes ingress
@@ -102,19 +102,49 @@ elabftw:
     ## @param elabftw.ingress.tls TLS configuration for ingress
     tls: []
 
+  ## @param elabftw.securityContext.runAsNonRoot Run the container as a non-root user
+  ## @param elabftw.securityContext.runAsUser User ID used to run the container
+  ## @param elabftw.securityContext.runAsGroup Group ID used to run the container
+  ## @param elabftw.securityContext.allowPrivilegeEscalation Prevent privilege escalation
+  ## @param elabftw.securityContext.readOnlyRootFilesystem Mount the container root filesystem as read-only
+  ## @param elabftw.securityContext.capabilities.drop Linux capabilities to drop from the container
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1002
+    runAsGroup: 100
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+
+  ## @param elabftw.podSecurityContext.fsGroup Filesystem group ID for mounted volumes
+  ## @param elabftw.podSecurityContext.fsGroupChangePolicy Policy controlling when volume ownership is changed
+  ## @param elabftw.podSecurityContext.seccompProfile.type Seccomp profile type
+  podSecurityContext:
+    fsGroup: 100
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
+
   persistence:
-    ## @param elabftw.persistence.enabled Enable persistent storage for uploaded files
+    ## @param elabftw.persistence.enabled Enable persistent storage for eLabFTW files
     enabled: true
+
     ## @param elabftw.persistence.existingClaim Use an existing persistent volume claim
     existingClaim: ""
-    ## @param elabftw.persistence.accessMode
+
+    ## @param elabftw.persistence.accessMode Persistent volume access mode
     accessMode: ReadWriteMany
+
     ## @param elabftw.persistence.storageClass Storage class for persistent volume
     storageClass: ""
+
     ## @param elabftw.persistence.size Persistent volume size
     size: 10Gi
-    ## @param elabftw.persistence.mountPath Path where uploaded files are mounted
-    mountPath: /elabftw/uploads
+
+    ## @param elabftw.persistence.exportsPath Directory in the PVC containing exported files
+    exportsPath: exports
 
   ## @param elabftw.resources Kubernetes resource requests and limits
   resources: {}

@@ -1,4 +1,5 @@
 apiVersion: apps/v1
+
 kind: Deployment
 
 metadata:
@@ -9,6 +10,7 @@ spec:
 
   strategy:
     type: {{ .Values.elabftw.updateStrategy.type }}
+
 {{- if eq .Values.elabftw.updateStrategy.type "RollingUpdate" }}
     rollingUpdate:
       maxUnavailable: {{ .Values.elabftw.updateStrategy.rollingUpdate.maxUnavailable }}
@@ -23,24 +25,44 @@ spec:
     metadata:
       labels:
         app: {{ include "elabftw.name" . }}
+
 {{- with .Values.elabftw.podLabels }}
 {{ toYaml . | nindent 8 }}
 {{- end }}
+
 {{- with .Values.elabftw.podAnnotations }}
       annotations:
 {{ toYaml . | nindent 8 }}
 {{- end }}
 
     spec:
+      securityContext:
+        fsGroup: {{ .Values.elabftw.podSecurityContext.fsGroup }}
+        fsGroupChangePolicy: {{ .Values.elabftw.podSecurityContext.fsGroupChangePolicy }}
+        seccompProfile:
+          type: {{ .Values.elabftw.podSecurityContext.seccompProfile.type }}
+
       containers:
         - name: {{ include "elabftw.name" . }}
 
           image: "{{ .Values.elabftw.image.repository }}:{{ .Values.elabftw.image.tag | default .Chart.AppVersion }}"
+
           imagePullPolicy: {{ .Values.elabftw.image.pullPolicy }}
+
+          securityContext:
+            runAsNonRoot: {{ .Values.elabftw.securityContext.runAsNonRoot }}
+            runAsUser: {{ .Values.elabftw.securityContext.runAsUser }}
+            runAsGroup: {{ .Values.elabftw.securityContext.runAsGroup }}
+            allowPrivilegeEscalation: {{ .Values.elabftw.securityContext.allowPrivilegeEscalation }}
+            readOnlyRootFilesystem: {{ .Values.elabftw.securityContext.readOnlyRootFilesystem }}
+            capabilities:
+              drop:
+                {{- toYaml .Values.elabftw.securityContext.capabilities.drop | nindent 16 }}
 
           ports:
             - name: http
               containerPort: {{ .Values.elabftw.container.port }}
+              protocol: TCP
 
 {{- with .Values.elabftw.resources }}
           resources:
@@ -65,41 +87,11 @@ spec:
             ################
             # OPENCLONING
             ################
-
             - name: OPENCLONING_URL
               value: {{ .Values.addons.opencloning.url | quote }}
 
             - name: USE_OPENCLONING
               value: "true"
-
-
-{{- end }}
-
-{{- if .Values.addons.chemPlugin.enabled }}
-
-            ################
-            # CHEM PLUGIN
-            ################
-
-{{- if .Values.addons.chemPlugin.indigo.enabled }}
-
-            - name: USE_INDIGO
-              value: "true"
-
-            - name: INDIGO_URL
-              value: {{ .Values.addons.chemPlugin.indigo.url | quote }}
-
-{{- end }}
-
-{{- if .Values.addons.chemPlugin.fingerprinter.enabled }}
-
-            - name: USE_FINGERPRINTER
-              value: "true"
-
-            - name: FINGERPRINTER_URL
-              value: {{ .Values.addons.chemPlugin.fingerprinter.url | quote }}
-
-{{- end }}
 
 {{- end }}
 
@@ -141,17 +133,8 @@ spec:
             - name: SITE_URL
               value: {{ .Values.elabftw.siteUrl | quote }}
 
-            - name: SERVER_NAME
-              value: {{ .Values.elabftw.serverName | quote }}
-
             - name: DISABLE_HTTPS
               value: {{ .Values.elabftw.disableHttps | quote }}
-
-            - name: ENABLE_LETSENCRYPT
-              value: {{ .Values.elabftw.enableLetsencrypt | quote }}
-
-            - name: ENABLE_IPV6
-              value: "false"
 
             - name: SET_REAL_IP
               value: "false"
@@ -208,7 +191,6 @@ spec:
             - name: USE_PERSISTENT_MYSQL_CONN
               value: {{ .Values.elabftw.database.persistentConnection | quote }}
 
-
 {{- if or .Values.redis.enabled .Values.externalRedis.enabled }}
 
             ################
@@ -225,10 +207,8 @@ spec:
               value: {{ if .Values.redis.enabled }}"6379"{{ else }}{{ .Values.externalRedis.port | quote }}{{ end }}
 
 {{- if and .Values.externalRedis.enabled .Values.externalRedis.username }}
-
             - name: REDIS_USERNAME
               value: {{ .Values.externalRedis.username | quote }}
-
 {{- end }}
 
             - name: REDIS_PASSWORD
@@ -245,45 +225,63 @@ spec:
 {{- end }}
 
 {{- with .Values.elabftw.extraEnv }}
-
 {{ toYaml . | nindent 12 }}
-
 {{- end }}
-
-{{- if .Values.elabftw.persistence.enabled }}
 
           volumeMounts:
-            - name: data
-              mountPath: {{ .Values.elabftw.persistence.mountPath }}
-
-{{- end }}
 
 {{- if .Values.elabftw.persistence.enabled }}
 
+            # eLabFTW uploaded files
+            - name: data
+              mountPath: /var/lib/elabftw/uploads
+
+            # eLabFTW generated exports
+            - name: data
+              mountPath: /var/lib/elabftw/exports
+              subPath: {{ .Values.elabftw.persistence.exportsPath }}
+
+{{- end }}
+
+            # Writable cache required by eLabFTW v6
+            - name: cache
+              mountPath: /var/cache/elabftw
+
+            # Writable /run required by eLabFTW v6
+            - name: run
+              mountPath: /run
+
       volumes:
+
+{{- if .Values.elabftw.persistence.enabled }}
+
         - name: data
           persistentVolumeClaim:
             claimName: {{ default (printf "%s-pvc" (include "elabftw.fullname" .)) .Values.elabftw.persistence.existingClaim }}
 
 {{- end }}
 
-{{- with .Values.elabftw.nodeSelector }}
+        # eLabFTW cache
+        - name: cache
+          emptyDir: {}
 
+        # eLabFTW /run
+        - name: run
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+
+{{- with .Values.elabftw.nodeSelector }}
       nodeSelector:
 {{ toYaml . | nindent 8 }}
-
 {{- end }}
 
 {{- with .Values.elabftw.affinity }}
-
       affinity:
 {{ toYaml . | nindent 8 }}
-
 {{- end }}
 
 {{- with .Values.elabftw.tolerations }}
-
       tolerations:
 {{ toYaml . | nindent 8 }}
-
 {{- end }}

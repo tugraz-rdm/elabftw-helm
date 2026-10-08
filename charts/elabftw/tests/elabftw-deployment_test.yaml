@@ -1,4 +1,5 @@
 suite: elabftw deployment
+
 templates:
   - templates/deployment.yaml
 
@@ -10,6 +11,11 @@ set:
   elabftw.secrets.existingSecret: "test-secret"
 
 tests:
+
+  # ---------------------------------------------------------------------------
+  # Basic Deployment
+  # ---------------------------------------------------------------------------
+
   - it: renders a Deployment
     asserts:
       - isKind:
@@ -29,6 +35,10 @@ tests:
           path: spec.replicas
           value: 3
 
+  # ---------------------------------------------------------------------------
+  # Update strategy
+  # ---------------------------------------------------------------------------
+
   - it: sets rolling update strategy
     asserts:
       - equal:
@@ -40,6 +50,20 @@ tests:
       - equal:
           path: spec.strategy.rollingUpdate.maxSurge
           value: 1
+
+  - it: does not render rolling update configuration for non RollingUpdate strategy
+    set:
+      elabftw.updateStrategy.type: Recreate
+    asserts:
+      - equal:
+          path: spec.strategy.type
+          value: Recreate
+      - notExists:
+          path: spec.strategy.rollingUpdate
+
+  # ---------------------------------------------------------------------------
+  # Pod labels and annotations
+  # ---------------------------------------------------------------------------
 
   - it: sets pod app label
     asserts:
@@ -64,6 +88,72 @@ tests:
           path: spec.template.metadata.annotations["prometheus.io/scrape"]
           value: "true"
 
+  # ---------------------------------------------------------------------------
+  # Pod security context
+  # ---------------------------------------------------------------------------
+
+  - it: sets pod fsGroup
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 100
+
+  - it: sets pod fsGroupChangePolicy
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroupChangePolicy
+          value: OnRootMismatch
+
+  - it: sets pod seccomp profile
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.seccompProfile.type
+          value: RuntimeDefault
+
+  # ---------------------------------------------------------------------------
+  # Container security context
+  # ---------------------------------------------------------------------------
+
+  - it: runs container as non-root
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: true
+
+  - it: sets container runAsUser
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 1002
+
+  - it: sets container runAsGroup
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+          value: 100
+
+  - it: disables privilege escalation
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false
+
+  - it: uses read-only root filesystem
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+
+  - it: drops all Linux capabilities
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].securityContext.capabilities.drop
+          content: ALL
+
+  # ---------------------------------------------------------------------------
+  # Container image
+  # ---------------------------------------------------------------------------
+
   - it: sets container image
     set:
       elabftw.image.repository: myrepo/elabftw
@@ -73,17 +163,40 @@ tests:
           path: spec.template.spec.containers[0].image
           value: myrepo/elabftw:1.2.3
 
+  - it: uses chart appVersion when image tag is not configured
+    set:
+      elabftw.image.repository: myrepo/elabftw
+      elabftw.image.tag: ""
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: myrepo/elabftw:6.0.5
+
   - it: sets image pull policy
     asserts:
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
           value: IfNotPresent
 
+  # ---------------------------------------------------------------------------
+  # Container port
+  # ---------------------------------------------------------------------------
+
   - it: sets container port
     asserts:
       - equal:
           path: spec.template.spec.containers[0].ports[0].containerPort
-          value: 443
+          value: 8080
+
+  - it: names the container port http
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].name
+          value: http
+
+  # ---------------------------------------------------------------------------
+  # Resources
+  # ---------------------------------------------------------------------------
 
   - it: sets resources when configured
     set:
@@ -98,6 +211,47 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].resources.requests.cpu
           value: 100m
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: 256Mi
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: 500m
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 512Mi
+
+  # ---------------------------------------------------------------------------
+  # Probes
+  # ---------------------------------------------------------------------------
+
+  - it: configures readiness probe
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.tcpSocket.port
+          value: http
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.initialDelaySeconds
+          value: 30
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.periodSeconds
+          value: 10
+
+  - it: configures liveness probe
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.tcpSocket.port
+          value: http
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.initialDelaySeconds
+          value: 60
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.periodSeconds
+          value: 20
+
+  # ---------------------------------------------------------------------------
+  # Environment - eLabFTW
+  # ---------------------------------------------------------------------------
 
   - it: configures site URL environment variable
     set:
@@ -109,25 +263,55 @@ tests:
             name: SITE_URL
             value: "https://elab.example.com"
 
-  - it: configures nginx server name environment variable
+  - it: configures HTTPS setting
     set:
-      elabftw.serverName: elab.example.com
+      elabftw.disableHttps: true
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: SERVER_NAME
-            value: elab.example.com
+            name: DISABLE_HTTPS
+            value: "true"
 
-  - it: configures upload settings
+  - it: disables real IP handling
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SET_REAL_IP
+            value: "false"
+
+  # ---------------------------------------------------------------------------
+  # Environment - uploads
+  # ---------------------------------------------------------------------------
+
+  - it: configures maximum upload size
+    set:
+      elabftw.uploads.maxSize: 500M
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
             name: MAX_UPLOAD_SIZE
-            value: 100M
+            value: "500M"
+
+  - it: configures maximum upload time
+    set:
+      elabftw.uploads.maxTime: 3600
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: MAX_UPLOAD_TIME
+            value: "3600"
+
+  # ---------------------------------------------------------------------------
+  # Environment - PHP
+  # ---------------------------------------------------------------------------
 
   - it: configures PHP timezone
+    set:
+      global.timezone: Europe/Vienna
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
@@ -135,7 +319,84 @@ tests:
             name: PHP_TIMEZONE
             value: Europe/Vienna
 
+  - it: configures container timezone
+    set:
+      global.timezone: Europe/Vienna
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: TZ
+            value: Europe/Vienna
+
+  - it: configures PHP memory limit
+    set:
+      elabftw.php.memoryLimit: 512M
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: MAX_PHP_MEMORY
+            value: "512M"
+
+  - it: configures PHP max children
+    set:
+      elabftw.php.maxChildren: 20
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: PHP_MAX_CHILDREN
+            value: "20"
+
+  - it: configures PHP max execution time
+    set:
+      elabftw.php.maxExecutionTime: 3600
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: PHP_MAX_EXECUTION_TIME
+            value: "3600"
+
+  # ---------------------------------------------------------------------------
+  # Environment - OpenCloning
+  # ---------------------------------------------------------------------------
+
+  - it: does not configure opencloning when disabled
+    set:
+      addons.opencloning.enabled: false
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: OPENCLONING_URL
+
+  - it: configures opencloning when enabled
+    set:
+      addons.opencloning.enabled: true
+      addons.opencloning.url: "http://opencloning/"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: OPENCLONING_URL
+            value: "http://opencloning/"
+
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: USE_OPENCLONING
+            value: "true"
+
+  # ---------------------------------------------------------------------------
+  # Environment - Redis
+  # ---------------------------------------------------------------------------
+
   - it: disables redis by default
+    set:
+      redis.enabled: false
+      externalRedis.enabled: false
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
@@ -245,12 +506,6 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: USE_REDIS
-            value: "true"
-
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
             name: REDIS_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -269,20 +524,111 @@ tests:
             name: REDIS_PASSWORD
             value: redisPassword
 
+  # ---------------------------------------------------------------------------
+  # Persistence
+  # ---------------------------------------------------------------------------
+
   - it: mounts persistent volume when enabled
     asserts:
       - contains:
           path: spec.template.spec.containers[0].volumeMounts
           content:
             name: data
-            mountPath: /elabftw/uploads
+            mountPath: /var/lib/elabftw/uploads
 
-  - it: disables persistent volume when persistence is disabled
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: data
+            mountPath: /var/lib/elabftw/exports
+            subPath: exports
+
+  - it: mounts writable cache
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: cache
+            mountPath: /var/cache/elabftw
+
+  - it: mounts writable runtime directory
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: run
+            mountPath: /run
+
+  - it: disables data volume mounts when persistence is disabled
     set:
       elabftw.persistence.enabled: false
     asserts:
-      - notExists:
+      - notContains:
           path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: data
+
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: cache
+            mountPath: /var/cache/elabftw
+
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: run
+            mountPath: /run
+
+  - it: configures persistent volume claim
+    set:
+      elabftw.persistence.enabled: true
+      elabftw.persistence.existingClaim: my-existing-pvc
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: my-existing-pvc
+
+  - it: uses default persistent volume claim name
+    set:
+      elabftw.persistence.enabled: true
+      elabftw.persistence.existingClaim: ""
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: test-elabftw-pvc
+
+  # ---------------------------------------------------------------------------
+  # Runtime volumes
+  # ---------------------------------------------------------------------------
+
+  - it: configures writable cache volume
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: cache
+            emptyDir: {}
+
+  - it: configures writable runtime filesystem
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: run
+            emptyDir:
+              medium: Memory
+              sizeLimit: 64Mi
+
+  # ---------------------------------------------------------------------------
+  # Node selector
+  # ---------------------------------------------------------------------------
 
   - it: sets node selector
     set:
@@ -292,6 +638,10 @@ tests:
       - equal:
           path: spec.template.spec.nodeSelector["kubernetes.io/hostname"]
           value: worker-1
+
+  # ---------------------------------------------------------------------------
+  # Tolerations
+  # ---------------------------------------------------------------------------
 
   - it: sets tolerations
     set:
@@ -304,6 +654,19 @@ tests:
       - equal:
           path: spec.template.spec.tolerations[0].key
           value: dedicated
+      - equal:
+          path: spec.template.spec.tolerations[0].operator
+          value: Equal
+      - equal:
+          path: spec.template.spec.tolerations[0].value
+          value: web
+      - equal:
+          path: spec.template.spec.tolerations[0].effect
+          value: NoSchedule
+
+  # ---------------------------------------------------------------------------
+  # Affinity
+  # ---------------------------------------------------------------------------
 
   - it: sets affinity
     set:
@@ -316,68 +679,18 @@ tests:
           path: spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution[0].topologyKey
           value: kubernetes.io/hostname
 
-  - it: does not configure chem plugin when disabled
-    set:
-      addons.chemPlugin.enabled: false
-    asserts:
-      - notContains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: USE_INDIGO
-            value: "true"
+  # ---------------------------------------------------------------------------
+  # Extra environment variables
+  # ---------------------------------------------------------------------------
 
-  - it: configures Indigo when chem plugin is enabled
+  - it: adds extra environment variables
     set:
-      addons.chemPlugin.enabled: true
-      addons.chemPlugin.indigo.enabled: true
-      addons.chemPlugin.indigo.url: "http://chem-plugin:8080/"
+      elabftw.extraEnv:
+        - name: CUSTOM_ENV
+          value: custom-value
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: USE_INDIGO
-            value: "true"
-
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: INDIGO_URL
-            value: "http://chem-plugin:8080/"
-
-  - it: configures fingerprinter when chem plugin is enabled
-    set:
-      addons.chemPlugin.enabled: true
-      addons.chemPlugin.fingerprinter.enabled: true
-      addons.chemPlugin.fingerprinter.url: "http://chem-plugin:8000/"
-    asserts:
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: USE_FINGERPRINTER
-            value: "true"
-
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: FINGERPRINTER_URL
-            value: "http://chem-plugin:8000/"
-
-  - it: does not configure opencloning when disabled
-    set:
-      addons.opencloning.enabled: false
-    asserts:
-      - notContains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: OPENCLONING_URL
-
-  - it: configures opencloning when enabled
-    set:
-      addons.opencloning.enabled: true
-      addons.opencloning.url: "http://opencloning/"
-    asserts:
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: OPENCLONING_URL
-            value: "http://opencloning/"
+            name: CUSTOM_ENV
+            value: custom-value
