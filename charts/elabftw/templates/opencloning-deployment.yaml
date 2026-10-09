@@ -63,10 +63,7 @@ spec:
               value: {{ .Values.addons.opencloning.showAppBar | quote }}
 
             - name: DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "elabftw.database.secretName" . }}
-                  key: {{ include "elabftw.database.passwordKey" . }}
+              value: {{ include "elabftw.database.name" . | quote }}
 
           securityContext:
             allowPrivilegeEscalation: false
