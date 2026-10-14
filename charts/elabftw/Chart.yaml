@@ -1,7 +1,7 @@
 apiVersion: v2
 name: elabftw
 description: A Helm chart for Kubernetes
-appVersion: "6.0.5"
+appVersion: "6.0.6"
 icon: https://www.elabftw.net/img/android-chrome-512x512.png
 keywords:
   - elabftw
@@ -14,7 +14,7 @@ keywords:
   - kubernetes
   - helm
 type: application
-version: 0.6.0
+version: 0.6.1
 dependencies:
   - name: mysql
     condition: mysql.enabled
