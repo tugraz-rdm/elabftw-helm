@@ -170,7 +170,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: myrepo/elabftw:6.0.6
+          value: myrepo/elabftw:6.0.11
 
   - it: sets image pull policy
     asserts:
